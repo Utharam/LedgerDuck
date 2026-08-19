@@ -72,7 +72,12 @@ export default defineConfig(({ mode }) => {
   // Get and normalize base path from environment variable, default to '/'
   // Ensures it both starts and ends with a single '/'
   const getNormalizedBasePath = (value) => {
-    let path = (value || '/').trim();
+    let path = value;
+    if (!path && process.env.GITHUB_REPOSITORY) {
+      const repo = process.env.GITHUB_REPOSITORY.split('/')[1] || 'LedgerDuck';
+      path = `/${repo}/`;
+    }
+    path = (path || '/').trim();
     // Collapse all consecutive slashes into single slashes
     path = path.replace(/\/+/g, '/');
     // Ensure leading slash
