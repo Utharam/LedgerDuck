@@ -1,200 +1,128 @@
-# PondPilot - Get your data 🦆 in a row
+# LedgerDuck - Zero-Knowledge SQL Investigation Workspace for Accountants & Auditors 🦆
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
-[![Latest Release](https://img.shields.io/github/v/release/pondpilot/pondpilot)](https://github.com/pondpilot/pondpilot/releases/latest)
+[![Created by: Utharam](https://img.shields.io/badge/Created%20by-Utharam-indigo.svg)](https://utharam.github.io/)
+[![Engine: DuckDB--Wasm](https://img.shields.io/badge/Engine-DuckDB--Wasm-yellow.svg)](https://duckdb.org/)
 
-## 🚀 What is PondPilot?
+**LedgerDuck** is a privacy-first, zero-knowledge in-browser SQL investigation workspace designed specifically for financial auditors, forensic accountants, and controllers.
 
-PondPilot is a blazing-fast, lightweight, 100% client-side AI-enabled data exploration tool that helps you analyze local & remote data with zero setup. Powered by DuckDB-WASM and integrated AI assistance, it runs entirely in your browser — no install, no servers, no cloud uploads, complete privacy. Whether you're a data analyst, scientist, or engineer, PondPilot helps you get your data ducks in a row without the overhead of traditional data tools.
+Powered by **DuckDB-Wasm** and React, all analytical processing runs **100% locally in your browser**. No remote servers, no cloud uploads, and zero data leakage — your sensitive financial records and client ledger rows never leave your computer.
 
-## 💡 Why PondPilot?
+---
 
-**Traditional data tools have major drawbacks:**
+## 💡 Why LedgerDuck?
 
-- They require complex setup and installation
-- They often send your data to remote servers
-- They're resource-intensive and can be slow for large datasets
-- Many require paid subscriptions or have usage limits
+Auditing large general ledgers, trial balances, and bank statements in traditional spreadsheets (`.xlsx`, `.csv`) is slow, prone to formula errors, and struggles with files over 100,000 rows. Conversely, traditional database tools require technical IT setup and risk leaking confidential client data to third-party servers.
 
-**PondPilot solves these problems by:**
+**LedgerDuck solves this by offering:**
+1. **Zero-Knowledge Privacy**: 100% in-browser execution. No client data is ever transmitted over the network.
+2. **Instant Ingestion**: Drag and drop multi-gigabyte CSVs or Excel spreadsheets and query millions of rows in milliseconds using DuckDB SQL.
+3. **Pre-Built Audit Automation**: Built-in 1-click audit checks designed by accountants for accountants.
 
-- Running entirely in your browser with zero installation
-- Processing all data locally — your data never leaves your device
-- Using DuckDB's lightning-fast SQL engine optimized for analytical queries
-- Providing the ability to work directly with your files without making copies
-- Being completely free and open-source
+---
 
-## 🔍 Features
+## 🔍 Key Audit Features
 
-### 🔒 Privacy & Security
+### 🛡️ 1. Ingestion Guardrails (Rectangular & Clean Data Check)
+- **Merged Cell Rejection**: Scans Excel sheets on upload and rejects merged cells (`!merges`) with clear instructions to flatten the spreadsheet before processing.
+- **Rectangular Uniformity**: Automatically checks for uniform column counts across every row, preventing misaligned debit/credit columns.
+- **Header Sanitization**: Trims whitespace, cleans invalid characters, and resolves duplicate column headers.
+- **Broad File Support**: `.xlsx`, `.xls` (legacy), `.csv`, `.parquet`, and DuckDB database files.
 
-- **100% Client-Side**: All processing happens in your browser — your sensitive data never leaves your device
-- **PWA Support**: Install PondPilot as a Progressive Web App for offline use anywhere
-- **Read-only**: PondPilot doesn't write to your files, guaranteeing data safety and integrity
-- **Encrypted Secret Store**: API keys and credentials are encrypted with AES-GCM and stored in a dedicated IndexedDB
+---
 
-### ⚡ Performance & Efficiency
+### 📋 2. Pre-Loaded Accounting Command Drawer
+A dedicated right-hand audit panel featuring heuristic column detection (`Date`, `Particulars`, `Category`, `Amount`) and instant 1-click SQL audit templates:
+- **Exact Duplicates**: Detects identical invoice references, dates, and amounts.
+- **Potential Split Transactions**: Identifies multiple payments to the same vendor on the same date just below authorization thresholds (e.g. $4,950 x 2).
+- **Round-Sum Audit**: Flags round dollar transfers ($\ge \$1,000$, $\$5,000$, $\$10,000$) indicative of manual journal entries or unapplied balances.
+- **Materiality Outliers (Top 10)**: Surfaces the highest-value debit and credit postings for substantive sampling.
+- **Weekend / Non-Business Day Bookings**: Detects journal entries booked on Saturdays and Sundays.
 
-- **No data-copy**: Unlike similar tools, PondPilot accesses files directly without copying to browser cache — changes outside PondPilot are reflected in real-time
-- **Powered by DuckDB**: Leverage the lightning-fast SQL engine for analyzing millions of rows in seconds
-- **Cross-session persistence**: All data handles and queries are automatically saved between sessions
+---
 
-### 🤖 AI-Powered SQL Assistant
+### 🔖 3. Profile-Based Query Manager
+Organize recurring monthly and quarterly audit routines by account type:
+- 💳 **Amex Card Statement**: FX markup analysis, weekend dining/travel review, recurring SaaS subscriptions.
+- 🏦 **Bank Statements (HDFC / Chase)**: High-value debits (> $50k), bounce/penalty surcharges, round-sum wire transfers.
+- 💵 **Petty Cash / Cash Sheets**: Missing voucher numbers, excess cash payouts over statutory limits.
+- **Custom Profiles & JSON Sharing**: Create custom profiles and export/import `.json` query packs to standardize audit workflows across your audit team.
 
-- **Natural Language to SQL**: Generate complex SQL queries from simple English descriptions
-- **Intelligent Error Fixing**: Automatic suggestions to fix SQL on errors
-- **Multiple AI Providers**: Support for OpenAI, Anthropic Claude, and custom OpenAI-compatible endpoints
-- **Privacy-First**: Uses your own API keys — your queries and data never leave your control
-- **Context-Aware**: Understands your database schema and provides relevant suggestions
+---
 
-### 📊 Data Sources & Formats
+### 🔄 4. Continuous Query Insertion Engine
+Avoid tab clutter by choosing how to execute queries:
+- **"Insert in Active"**: Appends the query directly into the active script tab with clean header comments (`-- Audit Check: ...`) so you can chain your testing into a single audit workpaper.
+- **"New Tab"**: Opens in an isolated query tab.
+- **"Copy SQL"**: Copies query directly to your clipboard.
 
-- **Local Files**: CSV, Parquet, JSON, XLSX, DuckDB databases, Stata (.dta), SAS (.sas7bdat, .xpt), and SPSS (.sav, .zsav, .por)
-- **Remote Databases**: Connect to HTTP/HTTPS endpoints and S3-compatible storage with custom endpoint support
-- **Apache Iceberg**: Browse and query Iceberg catalogs with REST, OAuth2, Bearer token, and SigV4 authentication
-- **Clipboard Import**: Paste CSV or JSON data directly from your clipboard
-- **CORS Proxy**: Built-in proxy support (auto or manual) for accessing remote resources blocked by CORS
+---
 
-### 🧰 Analysis Tools
+### 🔒 5. Zero-Knowledge Schema-to-Prompt Helper
+- Need help writing complex SQL from an LLM (ChatGPT, Claude, Gemini)?
+- The helper extracts **strictly structural metadata** (table name, column names, and data types) and formats a structured prompt.
+- **Zero financial rows or balances are ever included**, giving you the power of AI assistance with complete data confidentiality.
 
-- **Interactive SQL Editor**: Write and execute SQL with syntax highlighting, auto-completion, and error detection powered by Monaco Editor and FlowScope
-- **Charts**: Visualize query results with bar, line, area, scatter, pie, stacked bar, and horizontal bar charts — with aggregation, grouping, color presets, and fullscreen support
-- **Data Comparison**: Compare two data sources side-by-side with automatic join key detection, schema diffing, and multiple join strategies (auto, full outer, left, right, inner)
-- **Schema Browser**: Explore database schemas with an interactive relationship diagram, directional layout, and mini-map navigation
-- **Data Export**: Export results to CSV, TSV, XLSX, Parquet, SQL, XML, or Markdown
-- **Convert To**: Right-click any file or table to convert it to a different format
+---
 
-### 🎨 User Experience
+### 📜 6. Audit Trail & Workpaper Export
+- Automatically records every SQL query executed with ISO timestamp, local time, duration (ms), row count, and execution status.
+- Dedicated **Audit Trail** tab with 1-click **Export Workpaper (CSV / JSON)** for workpaper documentation and compliance files.
 
-- **Keyboard Shortcuts**: Navigate efficiently with intuitive keyboard shortcuts and a spotlight menu
-- **Dark/Light Mode**: Choose the interface that's easiest on your eyes, or follow your system preference
+---
 
-## 🚀 Getting Started
+### ⚡ 7. 1-Click Demo Ledger
+- New to SQL? Click **"Load Sample Audit Ledger"** on the welcome page to provision a mock company general ledger pre-seeded with real-world fraud and error scenarios for hands-on exploration.
 
-### Using the Web App
+---
 
-The easiest way to use PondPilot is through the hosted web app:
+## 🚀 Getting Started Locally
 
-1. Visit [https://app.pondpilot.io](https://app.pondpilot.io)
-2. Click "Add file" or use keyboard shortcut (`Ctrl+F`) to load your data
-3. Start exploring!
+### Prerequisites
+- Node.js (v18 or higher)
+- npm or yarn
 
-### Browser Requirements
-
-PondPilot works across all major browsers with different feature sets:
-
-- **Chrome/Edge**: Full functionality with file persistence and folder selection
-- **Firefox/Safari**: Core features with session-only file access (files must be re-selected after refresh). Drag & drop is recommended for the best experience
-
-### Running Locally
-
-#### Using Docker
-
-Run PondPilot with a single command:
+### Installation
 
 ```bash
-docker run -d -p 4173:80 --name pondpilot ghcr.io/pondpilot/pondpilot:latest
+# 1. Clone the repository
+git clone https://github.com/<your-username>/ledgerduck.git
+cd ledgerduck
+
+# 2. Install dependencies
+npm install
+# or: yarn
+
+# 3. Start the local development server
+npm run dev
+# or: yarn dev
 ```
 
-Visit `http://localhost:4173` in your browser to access the app.
+Open `http://localhost:5173` in your browser.
 
-> **Note:** PWA and offline mode is disabled for the Docker version to avoid conflicts with other apps serving on localhost.
+---
 
-##### Subdirectory Deployment
-
-PondPilot supports deployment in subdirectories alongside other services. See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed instructions on:
-
-- Building with custom base paths (e.g., `/custompath/`, `/pondpilot/`)
-- Configuring nginx reverse proxy
-- Docker Compose examples
-
-#### Using Yarn
-
-Alternatively, you can build & run PondPilot using Yarn:
+## 🛠️ Testing & Verification
 
 ```bash
-# Clone the repository
-git clone https://github.com/pondpilot/pondpilot.git
-cd pondpilot
+# Run TypeScript typecheck
+npm run typecheck
 
-# Setup the project
-corepack enable
-yarn
-
-# Start the development server
-yarn dev
+# Run full Jest unit test suite
+npx jest
 ```
 
-Visit `http://localhost:5173` in your browser to access the app.
+---
 
-## ⌨️ Keyboard Shortcuts
+## 📜 License & Open Source Attribution
 
-- `Ctrl/⌘ + K`: Open spotlight menu to navigate, add files, create new queries and explore shortcuts
-- `Ctrl + F`: Add file to analyze
-- `Ctrl + I`: Import SQL files
-- In editor:
-  - `Ctrl/⌘ + Enter`: Run the entire script
-  - `Ctrl/⌘ + Shift + Enter`: Run the query under the cursor
-  - `Ctrl/⌘ + I`: Open AI assistant for SQL generation and error fixes
+LedgerDuck is open-source software licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**.
 
-## 🏷️ Tagged Releases
-
-The official [hosted version](https://app.pondpilot.io/) of PondPilot and the latest tag for our [Docker image](https://ghcr.io/pondpilot/pondpilot) are continuously updated based on the `main` branch. However, we occasionally tag releases to mark significant milestones. You can read the draft release notes for the upcoming tagged version and all released versions on the [release page](https://github.com/pondpilot/pondpilot/releases) or in the [CHANGELOG](CHANGELOG.md).
-
-## 🤝 Contributing
-
-We welcome contributions from the community! Here's how to get started:
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 🛠️ Development
-
-### Tech Stack
-
-- React 19 with TypeScript
-- Mantine UI components
-- Tailwind CSS for styling
-- DuckDB-WASM for data processing
-- Monaco Editor for SQL editing
-- FlowScope for SQL analysis (completions, folding, symbols)
-- Recharts for data visualization
-- ReactFlow for schema diagrams
-- Vite for building
-
-### Available Scripts
-
-- `yarn dev` - Start development server
-- `yarn build` - Build production version
-- `yarn test` - Run Playwright tests
-- `yarn preview` - Locally preview production build
-- `yarn typecheck` - Check TypeScript types
-- `yarn lint` - Run ESLint and Stylelint
-- `yarn lint:fix` - Fix ESLint and Stylelint issues
-- `yarn prettier` - Check formatting
-- `yarn prettier:write` - Format code
-
-## 📜 License
-
-PondPilot is licensed under the GNU Affero General Public License v3.0. See the [LICENSE](LICENSE) file for details.
-
-This means you're free to use, modify, and distribute the software, but if you make changes and provide the software as a service over a network, you must make your source code available to users of that service.
-
-## 🙏 Acknowledgments
-
-- Built with [DuckDB-WASM](https://github.com/duckdb/duckdb-wasm) — the powerful SQL database that runs in your browser
-- SQL editor powered by [Monaco Editor](https://microsoft.github.io/monaco-editor/)
-- SQL analysis by [FlowScope](https://github.com/pondpilot/flowscope)
-- UI components by [Mantine](https://mantine.dev/)
-- Charts by [Recharts](https://recharts.org/)
-- Schema diagrams by [ReactFlow](https://reactflow.dev/)
+### Upstream Attribution:
+LedgerDuck is built upon the open-source foundation of **[PondPilot](https://github.com/pondpilot/pondpilot)** (AGPL-3.0) by T1A. We gratefully acknowledge the PondPilot team and the **[DuckDB-Wasm](https://github.com/duckdb/duckdb-wasm)** project for their browser database architecture.
 
 ---
 
 <p align="center">
-  <a href="https://app.pondpilot.io">app.pondpilot.io</a> •
-  <a href="https://github.com/pondpilot/pondpilot">GitHub</a> •
+  Created with ❤️ by <a href="https://utharam.github.io/">Utharam</a>
 </p>

@@ -1,4 +1,4 @@
-import { showError, showErrorWithAction, showSuccess } from '@components/app-notifications';
+import { showError, showSuccess } from '@components/app-notifications';
 import { getDatabaseModel } from '@controllers/db/duckdb-meta';
 import { syncFiles } from '@controllers/file-system';
 import { updateSQLScriptContent } from '@controllers/sql-script';
@@ -18,6 +18,7 @@ import { ChartConfig, DEFAULT_CHART_CONFIG, DEFAULT_VIEW_MODE, ViewMode } from '
 import { ScriptExecutionState } from '@models/sql-script';
 import { ScriptTab, TabId } from '@models/tab';
 import { AsyncDuckDBPooledPreparedStatement } from '@services/duckdb-pool/duckdb-pooled-prepared-stmt';
+import { useAuditLogStore } from '@store/audit-log-store';
 import {
   clearTransient,
   setScriptSession,
@@ -161,6 +162,9 @@ export const ScriptTabView = memo(({ tabId, active }: ScriptTabViewProps) => {
 
   const runScriptQuery = useCallback(
     async (query: string) => {
+      const startTime = performance.now();
+      const currentScript = useAppStore.getState().sqlScripts.get(tab.sqlScriptId);
+      const scriptName = currentScript?.name || 'Query';
       setScriptExecutionState('running');
 
       // Format query if preference is enabled
@@ -395,19 +399,18 @@ export const ScriptTabView = memo(({ tabId, active }: ScriptTabViewProps) => {
               statementIndex: statement.statementIndex,
               statementCode: statement.code.substring(0, 200),
             });
-            showErrorWithAction({
+            const durationMs = Math.round(performance.now() - startTime);
+            useAuditLogStore.getState().addEntry({
+              executedSql: query,
+              status: 'error',
+              rowsReturned: 0,
+              executionDurationMs: durationMs,
+              errorMessage: message,
+              scriptName,
+            });
+            showError({
               title: 'Error executing SQL statement',
               message: formatStatementError(statement, message),
-              action: {
-                label: 'Fix with AI',
-                onClick: () => {
-                  // Dispatch custom event to trigger AI Assistant
-                  const event = new CustomEvent('trigger-ai-assistant', {
-                    detail: { tabId },
-                  });
-                  window.dispatchEvent(event);
-                },
-              },
             });
             return;
           }
@@ -436,19 +439,18 @@ export const ScriptTabView = memo(({ tabId, active }: ScriptTabViewProps) => {
               statementIndex: lastStatement.statementIndex,
               statementCode: lastStatement.code.substring(0, 200),
             });
-            showErrorWithAction({
+            const durationMs = Math.round(performance.now() - startTime);
+            useAuditLogStore.getState().addEntry({
+              executedSql: query,
+              status: 'error',
+              rowsReturned: 0,
+              executionDurationMs: durationMs,
+              errorMessage: message,
+              scriptName,
+            });
+            showError({
               title: 'Error executing SQL statement',
               message: formatStatementError(lastStatement, message),
-              action: {
-                label: 'Fix with AI',
-                onClick: () => {
-                  // Dispatch custom event to trigger AI Assistant
-                  const event = new CustomEvent('trigger-ai-assistant', {
-                    detail: { tabId },
-                  });
-                  window.dispatchEvent(event);
-                },
-              },
             });
             return;
           }
@@ -475,19 +477,18 @@ export const ScriptTabView = memo(({ tabId, active }: ScriptTabViewProps) => {
               statementIndex: lastStatement.statementIndex,
               statementCode: lastStatement.code.substring(0, 200),
             });
-            showErrorWithAction({
+            const durationMs = Math.round(performance.now() - startTime);
+            useAuditLogStore.getState().addEntry({
+              executedSql: query,
+              status: 'error',
+              rowsReturned: 0,
+              executionDurationMs: durationMs,
+              errorMessage: message,
+              scriptName,
+            });
+            showError({
               title: 'Error executing SQL statement',
               message: formatStatementError(lastStatement, message),
-              action: {
-                label: 'Fix with AI',
-                onClick: () => {
-                  // Dispatch custom event to trigger AI Assistant
-                  const event = new CustomEvent('trigger-ai-assistant', {
-                    detail: { tabId },
-                  });
-                  window.dispatchEvent(event);
-                },
-              },
             });
             return;
           }
@@ -596,6 +597,15 @@ export const ScriptTabView = memo(({ tabId, active }: ScriptTabViewProps) => {
       setScriptExecutionState('success');
       clearTabExecutionError(tabId);
       incrementScriptVersion();
+
+      const durationMs = Math.round(performance.now() - startTime);
+      useAuditLogStore.getState().addEntry({
+        executedSql: query,
+        status: 'success',
+        rowsReturned: null,
+        executionDurationMs: durationMs,
+        scriptName,
+      });
 
       // As of today, even if the same statement is executed, we will
       // update the state and trigger re-render.

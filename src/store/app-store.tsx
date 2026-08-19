@@ -28,7 +28,7 @@ import { ExportFormat } from '@models/export-options';
 import { LocalEntry, LocalEntryId, LocalFile } from '@models/file-system';
 import { AppIdbSchema } from '@models/persisted-store';
 import { SQLScript, SQLScriptId, SQLScriptSession } from '@models/sql-script';
-import { AnyTab, ComparisonTab, ScriptTab, TabId, TabReactiveState, TabType } from '@models/tab';
+import { AnyTab, AuditLogTab, ComparisonTab, ScriptTab, TabId, TabReactiveState, TabType } from '@models/tab';
 import { getDatabaseIdentifier, isFlatFileDataSource } from '@utils/data-source';
 import { getTabIcon, getTabName } from '@utils/navigation';
 import { IDBPDatabase } from 'idb';
@@ -935,6 +935,35 @@ export const createTabFromComparison = (
     },
     undefined,
     'AppStore/createTabFromComparison',
+  );
+
+  return result;
+};
+
+export const createTabFromAuditLog = (
+  tab: AuditLogTab,
+  activeTabId?: TabId | null,
+): { activeTabId: TabId | null; tabOrder: TabId[] } => {
+  let result: { activeTabId: TabId | null; tabOrder: TabId[] } = {
+    activeTabId: null,
+    tabOrder: [],
+  };
+
+  useAppStore.setState(
+    (state) => {
+      const tabs = new Map(state.tabs).set(tab.id, tab);
+      const tabOrder = [...state.tabOrder, tab.id];
+      const nextActiveTabId = activeTabId === undefined ? state.activeTabId : activeTabId;
+      result = { activeTabId: nextActiveTabId, tabOrder };
+
+      return {
+        activeTabId: nextActiveTabId,
+        tabs,
+        tabOrder,
+      };
+    },
+    undefined,
+    'AppStore/createTabFromAuditLog',
   );
 
   return result;

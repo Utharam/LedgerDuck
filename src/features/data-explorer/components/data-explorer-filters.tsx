@@ -24,9 +24,9 @@ export type DataExplorerFilterType = 'all' | 'databases' | 'files' | 'remote';
 export type FileTypeFilter = Record<
   'csv' | 'json' | 'parquet' | 'xlsx' | ReadStatViewType,
   boolean
->;
+> & { xls?: boolean };
 
-const FILE_TYPE_FILTER_KEYS = ['csv', 'json', 'parquet', 'xlsx', ...READSTAT_VIEW_TYPES] as const;
+const FILE_TYPE_FILTER_KEYS = ['csv', 'json', 'parquet', 'xlsx', 'xls', ...READSTAT_VIEW_TYPES] as const;
 
 export const DEFAULT_FILE_TYPE_FILTER: FileTypeFilter = Object.fromEntries(
   FILE_TYPE_FILTER_KEYS.map((k) => [k, true]),

@@ -29,7 +29,6 @@ import {
   useState,
 } from 'react';
 
-import { registerAIAssistant, showAIAssistant, hideAIAssistant } from './ai-assistant-tooltip';
 import { useEditorTheme } from './hooks';
 import { monaco } from './monaco-setup';
 import {
@@ -575,8 +574,6 @@ export const SqlEditor = forwardRef<SqlEditorHandle, SqlEditorProps>(
     schemaRef.current = schema;
     const cursorOffsetRef = useRef(0);
     const mountedRef = useRef(true);
-    const [assistantVisible, setAssistantVisible] = useState(false);
-    const [structuredResponseVisible, setStructuredResponseVisible] = useState(false);
 
     const schemaCacheKey = useMemo(() => (schema ? JSON.stringify(schema) : ''), [schema]);
 
@@ -1238,17 +1235,6 @@ export const SqlEditor = forwardRef<SqlEditorHandle, SqlEditorProps>(
         },
       });
 
-      const aiManager = registerAIAssistant(editor, {
-        connectionPool,
-        sqlScripts,
-        onVisibilityChange: (visible, structured) => {
-          setAssistantVisible(visible);
-          setStructuredResponseVisible(structured);
-        },
-      });
-
-      disposablesRef.current.push(aiManager);
-
       disposablesRef.current.push(
         editor.onDidChangeCursorPosition((event: monaco.editor.ICursorPositionChangedEvent) => {
           const offset = editorModel ? editorModel.getOffsetAt(event.position) : 0;
@@ -1353,16 +1339,6 @@ export const SqlEditor = forwardRef<SqlEditorHandle, SqlEditorProps>(
           }
         },
       );
-
-      editor.addCommand(monacoInstance.KeyMod.CtrlCmd | monacoInstance.KeyCode.KeyI, () => {
-        if (editorRef.current) {
-          if (assistantVisible || structuredResponseVisible) {
-            hideAIAssistant(editorRef.current);
-          } else {
-            showAIAssistant(editorRef.current);
-          }
-        }
-      });
 
       disposablesRef.current.push(
         editor.addAction({

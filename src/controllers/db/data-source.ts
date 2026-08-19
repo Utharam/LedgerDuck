@@ -70,8 +70,9 @@ export async function registerFileSourceAndCreateView(
   fileExt: supportedFlatFileDataSourceFileExt,
   fileName: string,
   viewName: string,
+  customFile?: File,
 ): Promise<File> {
-  const file = await handle.getFile();
+  const file = customFile ?? (await handle.getFile());
   const db = conn.bindings;
 
   /**
@@ -403,8 +404,9 @@ export async function registerFileHandle(
   conn: AsyncDuckDBConnectionPool,
   handle: FileSystemFileHandle,
   fileName: string,
+  customFile?: File,
 ): Promise<File> {
-  const file = await handle.getFile();
+  const file = customFile ?? (await handle.getFile());
   const db = conn.bindings;
 
   // Drop file if it already exists

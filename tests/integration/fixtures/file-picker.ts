@@ -21,11 +21,11 @@ interface BaseProcessedFile {
 
 type ProcessedFileEntry =
   | (BaseProcessedFile & {
-      ext: 'xlsx';
+      ext: 'xlsx' | 'xls';
       content: XlsxContent;
     })
   | (BaseProcessedFile & {
-      ext: Exclude<supportedDataSourceFileExt, 'xlsx'>;
+      ext: Exclude<supportedDataSourceFileExt, 'xlsx' | 'xls'>;
       content: string;
     });
 
@@ -234,6 +234,7 @@ export const test = baseTest.extend<FilePickerFixtures>({
             break;
 
           case 'xlsx':
+          case 'xls':
             // eslint-disable-next-line no-case-declarations
             const xlsxFilePath = testTmp.join(file.path);
             // eslint-disable-next-line no-case-declarations

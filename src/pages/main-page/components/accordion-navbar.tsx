@@ -2,10 +2,8 @@ import { createSQLScript } from '@controllers/sql-script';
 import { getOrCreateTabFromScript } from '@controllers/tab';
 import { useBugReportModal } from '@hooks/use-bug-report-modal';
 import { ActionIcon, Stack, Tooltip, Box } from '@mantine/core';
-import { APP_GITHUB_URL } from '@models/app-urls';
 import { isSlackIntegrationConfigured } from '@services/slack-bug-report';
 import {
-  IconBrandGithub,
   IconPlus,
   IconSettings,
   IconLayoutSidebarRightCollapse,
@@ -59,18 +57,6 @@ export const AccordionNavbar = ({ onCollapse, collapsed = false }: NavbarProps) 
                 aria-label="Settings"
               >
                 <IconSettings size={20} />
-              </ActionIcon>
-            </Tooltip>
-            <Tooltip label="GitHub" position="right" withArrow openDelay={500}>
-              <ActionIcon
-                size="lg"
-                component="a"
-                href={APP_GITHUB_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Visit GitHub repository"
-              >
-                <IconBrandGithub size={20} />
               </ActionIcon>
             </Tooltip>
             {isSlackIntegrationConfigured() && (

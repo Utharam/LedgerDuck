@@ -27,12 +27,16 @@ export const AccordionContent = () => {
   const [dataExplorerHeight, setDataExplorerHeight] = useState<number | null>(null);
   const resizeStartRef = useRef<{ initialHeight: number; startY: number } | null>(null);
 
-  // Load saved section states or default to both expanded
+  // Load saved section states or default
   const [sectionStates, setSectionStates] = useState<SectionState>(() => {
     const saved = localStorage.getItem('accordion-navbar-sections');
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        return {
+          dataExplorer: parsed.dataExplorer ?? true,
+          queries: parsed.queries ?? true,
+        };
       } catch (e) {
         console.error('Failed to parse saved section states:', e);
       }
@@ -93,7 +97,6 @@ export const AccordionContent = () => {
           // DataExplorer should take all space except collapsed Queries
           const finalHeight = Math.max(100, containerHeight - collapsedQueriesHeight);
           setDataExplorerHeight(finalHeight);
-          // No setTimeout - keep the fixed height to avoid jump
         } else {
           setDataExplorerHeight(null);
         }
@@ -251,7 +254,7 @@ export const AccordionContent = () => {
         <button
           type="button"
           aria-label="Resize handle - use arrow keys to adjust"
-          className="h-px bg-borderPrimary-light dark:bg-borderPrimary-dark relative cursor-ns-resize w-full border-none outline-hidden"
+          className="h-px bg-borderPrimary-light dark:border-borderPrimary-dark relative cursor-ns-resize w-full border-none outline-hidden"
           onMouseDown={handleMouseDown}
           onKeyDown={(e) => {
             if (e.key === 'ArrowUp') {

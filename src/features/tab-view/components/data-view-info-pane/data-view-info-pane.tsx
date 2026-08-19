@@ -311,6 +311,14 @@ export const DataViewInfoPane = ({
           );
         }
 
+        case 'audit-log': {
+          return (
+            <Text {...textDefaultProps} c="text-error">
+              Audit log error.
+            </Text>
+          );
+        }
+
         default:
           assertNeverValueType(tabType);
           break;

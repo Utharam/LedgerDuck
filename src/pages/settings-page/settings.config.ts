@@ -36,18 +36,6 @@ export const settingsConfig: SettingsConfig = {
       ],
     },
     {
-      id: 'ai-assistant',
-      title: 'AI Assistant',
-      sections: [
-        {
-          id: 'ai-config',
-          title: 'AI Assistant',
-          description: 'Configure your AI assistant provider and model.',
-          component: AISettings,
-        },
-      ],
-    },
-    {
       id: 'remote-databases',
       title: 'Remote Databases',
       sections: [

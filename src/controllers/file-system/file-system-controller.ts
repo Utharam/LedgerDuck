@@ -34,6 +34,11 @@ import {
 } from '@utils/data-source';
 import { localEntryFromHandle } from '@utils/file-system';
 import { findUniqueName } from '@utils/helpers';
+import {
+  validateAndSanitizeSpreadsheet,
+  validateAndSanitizeCsv,
+  IngestionValidationError,
+} from '@utils/ingestion-guardrails';
 import { sanitizeErrorMessage } from '@utils/sanitize-error';
 import { makeSQLScriptId } from '@utils/sql-script';
 import { getXlsxSheetNames } from '@utils/xlsx';
@@ -157,23 +162,50 @@ export const addLocalFileOrFolders = async (
           return false;
         }
       }
+      case 'xls':
       case 'xlsx': {
-        // Excel file: only add if at least one sheet has data
-        const xlsxFile = await file.handle.getFile();
-        const sheetNames = await getXlsxSheetNames(xlsxFile);
-
-        if (sheetNames.length === 0) {
-          errors.push(`XLSX file ${file.name} has no sheets.`);
+        // Excel file (.xlsx, .xls): apply ingestion guardrails (reject merged cells, check rectangular shape, sanitize headers)
+        let rawFile: File;
+        try {
+          rawFile = await file.handle.getFile();
+        } catch (err) {
+          errors.push(`Failed to read file ${file.name}: ${err instanceof Error ? err.message : String(err)}`);
           return false;
         }
-        const fileName = `${file.uniqueAlias}.${file.ext}`;
+
+        let sanitizedFile: File;
+        let sheetNames: string[];
+        try {
+          const validationResult = await validateAndSanitizeSpreadsheet(rawFile);
+          sanitizedFile = validationResult.sanitizedFile;
+          sheetNames = validationResult.sheetNames;
+        } catch (validationErr) {
+          if (validationErr instanceof IngestionValidationError) {
+            errors.push(`Guardrail Check Failed (${file.name}): ${validationErr.message}`);
+          } else {
+            errors.push(
+              `Failed to process spreadsheet ${file.name}: ${
+                validationErr instanceof Error ? validationErr.message : String(validationErr)
+              }`,
+            );
+          }
+          return false;
+        }
+
+        if (sheetNames.length === 0) {
+          errors.push(`Spreadsheet ${file.name} has no sheets.`);
+          return false;
+        }
+
+        // Always register as .xlsx (since sanitized / .xls is converted to standard clean .xlsx)
+        const fileName = `${file.uniqueAlias}.xlsx`;
         const succeededSheets: string[] = [];
         const skippedSheets: string[] = [];
         let regFile: File | null = null;
         for (const sheetName of sheetNames) {
           try {
             if (!regFile) {
-              regFile = await registerFileHandle(conn, file.handle, fileName);
+              regFile = await registerFileHandle(conn, file.handle, fileName, sanitizedFile);
               newRegisteredFiles.push([file.id, regFile]);
             }
             const sheetDataSource = addXlsxSheetDataSource(file, sheetName, reservedViews);
@@ -192,7 +224,7 @@ export const addLocalFileOrFolders = async (
           }
         }
         if (succeededSheets.length === 0) {
-          errors.push(`XLSX file ${file.name} has no data in any sheet.`);
+          errors.push(`Spreadsheet ${file.name} has no data in any sheet.`);
           return false;
         }
         if (skippedSheets.length > 0) {
@@ -201,7 +233,27 @@ export const addLocalFileOrFolders = async (
         return true;
       }
       default: {
-        // Other flat file (csv/json)
+        // Flat file (csv, json, parquet, etc.)
+        let customFile: File | undefined;
+        if (file.ext === 'csv') {
+          try {
+            const rawFile = await file.handle.getFile();
+            const validationResult = await validateAndSanitizeCsv(rawFile);
+            customFile = validationResult.sanitizedFile;
+          } catch (validationErr) {
+            if (validationErr instanceof IngestionValidationError) {
+              errors.push(`Guardrail Check Failed (${file.name}): ${validationErr.message}`);
+            } else {
+              errors.push(
+                `Failed to process CSV ${file.name}: ${
+                  validationErr instanceof Error ? validationErr.message : String(validationErr)
+                }`,
+              );
+            }
+            return false;
+          }
+        }
+
         const dataSource = addFlatFileDataSource(file, reservedViews);
 
         // Add to reserved views
@@ -217,6 +269,7 @@ export const addLocalFileOrFolders = async (
             file.ext,
             `${file.uniqueAlias}.${file.ext}`,
             dataSource.viewName,
+            customFile,
           );
 
           newRegisteredFiles.push([file.id, regFile]);

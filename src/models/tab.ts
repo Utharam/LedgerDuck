@@ -41,7 +41,7 @@ export type TabDataViewStateCache = {
   chartConfig: ChartConfig | null;
 };
 
-export type TabType = 'script' | 'data-source' | 'schema-browser' | 'comparison';
+export type TabType = 'script' | 'data-source' | 'schema-browser' | 'comparison' | 'audit-log';
 
 export interface TabBase {
   readonly type: TabType;
@@ -49,6 +49,10 @@ export interface TabBase {
 
   // This is used to be able to restore the tab after restart
   dataViewStateCache: TabDataViewStateCache | null;
+}
+
+export interface AuditLogTab extends TabBase {
+  readonly type: 'audit-log';
 }
 
 export interface ScriptTab extends TabBase {
@@ -132,7 +136,7 @@ export interface ComparisonTab extends TabBase {
 }
 
 export type AnyFileSourceTab = FlatFileDataSourceTab | LocalDBDataTab;
-export type AnyTab = ScriptTab | AnyFileSourceTab | SchemaBrowserTab | ComparisonTab;
+export type AnyTab = ScriptTab | AnyFileSourceTab | SchemaBrowserTab | ComparisonTab | AuditLogTab;
 export type TabReactiveState<T extends AnyTab> = T extends ScriptTab
   ? Omit<ScriptTab, 'dataViewStateCache'>
   : T extends FlatFileDataSourceTab
@@ -141,4 +145,6 @@ export type TabReactiveState<T extends AnyTab> = T extends ScriptTab
       ? Omit<SchemaBrowserTab, 'dataViewStateCache'>
       : T extends ComparisonTab
         ? Omit<ComparisonTab, 'dataViewStateCache'>
-        : Omit<LocalDBDataTab, 'dataViewStateCache'>;
+        : T extends AuditLogTab
+          ? Omit<AuditLogTab, 'dataViewStateCache'>
+          : Omit<LocalDBDataTab, 'dataViewStateCache'>;

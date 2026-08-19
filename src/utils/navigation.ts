@@ -35,6 +35,11 @@ export function getTabName(
     return comparisons.get(tab.comparisonId)?.name || 'Unknown comparison';
   }
 
+  // Audit Log tab
+  if (tab.type === 'audit-log') {
+    return 'Audit Trail';
+  }
+
   // Data source tabs
   const dataSource = dataSources.get(tab.dataSourceId);
 
@@ -93,6 +98,10 @@ export function getTabIcon(
 
   if (tab.type === 'comparison') {
     return 'comparison';
+  }
+
+  if (tab.type === 'audit-log') {
+    return 'audit-log';
   }
 
   if (tab.type === 'data-source' && tab.dataSourceType === 'file') {

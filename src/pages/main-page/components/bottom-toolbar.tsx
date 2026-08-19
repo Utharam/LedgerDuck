@@ -1,9 +1,7 @@
 import { useBugReportModal } from '@hooks/use-bug-report-modal';
 import { ActionIcon, Group, Tooltip, Box } from '@mantine/core';
-import { APP_GITHUB_URL } from '@models/app-urls';
 import { isSlackIntegrationConfigured } from '@services/slack-bug-report';
 import {
-  IconBrandGithub,
   IconSettings,
   IconLayoutSidebarLeftCollapse,
   IconBug,
@@ -34,19 +32,6 @@ export const BottomToolbar = ({ onCollapse }: BottomToolbarProps) => {
             aria-label="Settings"
           >
             <IconSettings size={20} />
-          </ActionIcon>
-        </Tooltip>
-        <Tooltip label="GitHub" position="top" withArrow openDelay={500}>
-          <ActionIcon
-            size="sm"
-            component="a"
-            href={APP_GITHUB_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="shrink-0"
-            aria-label="Visit GitHub repository"
-          >
-            <IconBrandGithub size={20} />
           </ActionIcon>
         </Tooltip>
         {isSlackIntegrationConfigured() && (

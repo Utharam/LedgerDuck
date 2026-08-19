@@ -2,6 +2,7 @@ import { BrowserCompatibilityAlert } from '@components/browser-compatibility-ale
 import { createSQLScript } from '@controllers/sql-script';
 import { getOrCreateTabFromScript } from '@controllers/tab';
 import { createComparisonTab } from '@controllers/tab/comparison-tab-controller';
+import { AuditPanel } from '@features/audit-panel';
 import { StartGuide } from '@features/start-guide';
 import { TabView } from '@features/tab-view/tab-view';
 import { TabsPane } from '@features/tabs-pane';
@@ -12,6 +13,7 @@ import { useHotkeys, useLocalStorage } from '@mantine/hooks';
 import { Spotlight } from '@mantine/spotlight';
 import { LOCAL_STORAGE_KEYS } from '@models/local-storage';
 import { useAppStore } from '@store/app-store';
+import { useAuditPanelStore } from '@store/audit-panel-store';
 import { importSQLFiles } from '@utils/import-script-file';
 import { Allotment } from 'allotment';
 import { useCallback, useRef, useEffect, useState } from 'react';
@@ -25,6 +27,8 @@ export const MainPage = () => {
    */
   const { handleAddFile, handleAddFolder } = useAddLocalFilesOrFolders();
   const colorScheme = useAppTheme();
+  const { isOpen: auditPanelOpen, togglePanel: toggleAuditPanel } = useAuditPanelStore();
+
   const [layoutSizes, setOuterLayoutSizes] = useLocalStorage<number[]>({
     key: LOCAL_STORAGE_KEYS.MAIN_LAYOUT_DIMENSIONS,
   });
@@ -160,6 +164,12 @@ export const MainPage = () => {
         Spotlight.close();
       },
     ],
+    [
+      'Ctrl+Alt+A',
+      () => {
+        toggleAuditPanel();
+      },
+    ],
   ]);
 
   const mainContent = (
@@ -193,13 +203,22 @@ export const MainPage = () => {
       onDragEnd={handleDragEnd}
     >
       <Allotment.Pane
-        preferredSize={sidebarCollapsed ? 56 : layoutSizes?.[0] || 280}
+        preferredSize={sidebarCollapsed ? 56 : layoutSizes?.[0] || 260}
         maxSize={sidebarCollapsed ? 56 : 400}
         minSize={sidebarCollapsed ? 56 : 200}
       >
         <AccordionNavbar onCollapse={toggleSidebar} collapsed={sidebarCollapsed} />
       </Allotment.Pane>
       <Allotment.Pane preferredSize={layoutSizes?.[1]}>{mainContent}</Allotment.Pane>
+      <Allotment.Pane
+        visible={auditPanelOpen}
+        preferredSize={320}
+        minSize={260}
+        maxSize={480}
+        snap
+      >
+        <AuditPanel />
+      </Allotment.Pane>
     </Allotment>
   );
 };

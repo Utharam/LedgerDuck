@@ -12,6 +12,7 @@ export type LocalFileType = 'data-source' | 'code-file';
 export const SUPPORTED_DATA_SOURCE_FILE_EXTS = [
   'csv',
   'xlsx',
+  'xls',
   'duckdb',
   'parquet',
   'json',
@@ -31,6 +32,7 @@ export type AllDataSourceFileExt =
   | 'parquet'
   | 'arrow'
   | 'xlsx'
+  | 'xls'
   | 'sas7bdat'
   | 'xpt'
   | 'sav'
@@ -49,6 +51,7 @@ export const dataSourceMimeTypes = [
   'application/parquet',
   'application/arrow',
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.ms-excel',
   'application/octet-stream',
   'application/octet-stream',
   'application/octet-stream',
@@ -70,6 +73,7 @@ export const dataSourceExtMap = {
   parquet: 'application/parquet',
   arrow: 'application/arrow',
   xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  xls: 'application/vnd.ms-excel',
   // Statistical file formats use octet-stream; type detection relies on file extension
   sas7bdat: 'application/octet-stream',
   xpt: 'application/octet-stream',

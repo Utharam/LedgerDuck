@@ -20,6 +20,7 @@ import {
   IconNumber10,
   IconBrackets,
   IconScale,
+  IconHistory,
 } from '@tabler/icons-react';
 import React from 'react';
 
@@ -29,8 +30,9 @@ export type IconType =
   | 'folder'
   | 'code-file'
   | 'xlsx'
+  | 'xls'
   | 'db'
-  | 'duck' // PondPilot system database
+  | 'duck' // LedgerDuck system database
   // Database data sources
   | 'db-schema'
   | 'db-table'
@@ -48,6 +50,7 @@ export type IconType =
   | 'xlsx-sheet'
   // Tab types
   | 'comparison'
+  | 'audit-log'
   // Column types
   | 'column-float'
   | 'column-decimal'
@@ -142,11 +145,14 @@ export const NamedIcon: React.FC<NamedIconProps> = ({ iconType, ...iconProps }) 
     case 'dta':
       return <IconTable {...iconProps} />;
     case 'xlsx':
+    case 'xls':
       return <IconFileTypeXls {...iconProps} />;
     case 'xlsx-sheet':
       return <IconTable {...iconProps} />;
     case 'comparison':
       return <IconScale {...iconProps} />;
+    case 'audit-log':
+      return <IconHistory {...iconProps} />;
 
     case 'error':
       return <IconQuestionMark {...iconProps} />;

@@ -13,11 +13,7 @@ import {
   updateLiveScriptContentSnapshot,
 } from '@controllers/tab';
 import { SqlEditor, SqlEditorHandle } from '@features/editor';
-import {
-  showAIAssistant,
-  hideAIAssistant,
-  isAIAssistantVisible,
-} from '@features/editor/ai-assistant-tooltip';
+import { SchemaPromptHelperModal } from '@features/schema-prompt-helper';
 import { convertToFlowScopeSchema } from '@features/editor/auto-complete';
 import { monaco } from '@features/editor/monaco-setup';
 import { useAppTheme } from '@hooks/use-app-theme';
@@ -524,63 +520,10 @@ export const ScriptEditor = ({
     };
   }, []);
 
-  // Listen for AI Assistant trigger event
-  useEffect(() => {
-    const handleTriggerAIAssistant = (event: CustomEvent) => {
-      const { editor } = editorRef.current ?? {};
-      if (event.detail.tabId === tabId && editor && tabId) {
-        const { tabExecutionErrors } = useAppStore.getState();
-        const errorContext = tabExecutionErrors.get(tabId);
-        showAIAssistant(editor, errorContext);
-      }
-    };
-
-    window.addEventListener('trigger-ai-assistant', handleTriggerAIAssistant as EventListener);
-
-    return () => {
-      window.removeEventListener('trigger-ai-assistant', handleTriggerAIAssistant as EventListener);
-    };
-  }, [tabId]);
-
-  // Handle Escape key to exit history mode.
-  // Don't exit if a modal is open (e.g., rename dialog) - let the modal handle Escape.
-  useEffect(() => {
-    if (!historyMode) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        // Check if focus is inside a modal - if so, let the modal handle Escape
-        const modalContainer = document.querySelector('.mantine-Modal-root');
-        if (modalContainer?.contains(e.target as Node)) {
-          return;
-        }
-
-        e.preventDefault();
-        handleExitHistoryMode();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [historyMode, handleExitHistoryMode]);
-
-  useDidUpdate(() => {
-    if (active) {
-      editorRef.current?.editor?.focus();
-    }
-  }, [active]);
+  const [promptHelperOpened, setPromptHelperOpened] = useState(false);
 
   const handleAIAssistantClick = () => {
-    const { editor } = editorRef.current ?? {};
-    if (editor && tabId) {
-      if (isAIAssistantVisible(editor)) {
-        hideAIAssistant(editor);
-      } else {
-        const { tabExecutionErrors } = useAppStore.getState();
-        const errorContext = tabExecutionErrors.get(tabId);
-        showAIAssistant(editor, errorContext);
-      }
-    }
+    setPromptHelperOpened(true);
   };
 
   return (
@@ -589,6 +532,10 @@ export const ScriptEditor = ({
       data-testid={setDataTestId('query-editor')}
       data-active-editor={!!active}
     >
+      <SchemaPromptHelperModal
+        opened={promptHelperOpened}
+        onClose={() => setPromptHelperOpened(false)}
+      />
       {/* Main editor area */}
       <div className="flex-1 flex flex-col min-w-0">
         <ScriptEditorDataStatePane

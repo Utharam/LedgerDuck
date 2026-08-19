@@ -1,4 +1,5 @@
 import { deleteTab } from '@controllers/tab';
+import { AuditLogTabView } from '@features/audit-log';
 import { ComparisonTabView } from '@features/comparison';
 import { ScriptEditor } from '@features/script-editor';
 import { Skeleton, Stack } from '@mantine/core';
@@ -82,6 +83,7 @@ export const TabView = () => {
                 )}
                 {tabType === 'schema-browser' && <SchemaTabView tabId={tabId} active={isActive} />}
                 {tabType === 'comparison' && <ComparisonTabView tabId={tabId} active={isActive} />}
+                {tabType === 'audit-log' && <AuditLogTabView active={isActive} />}
               </ErrorBoundary>
             </div>
           );

@@ -2,17 +2,23 @@ import duckLogoDark from '@assets/duck-dark.svg';
 import duckLogo from '@assets/duck.svg';
 import { HotkeyPill } from '@components/hotkey-pill';
 import { SpotlightMenu } from '@components/spotlight';
-import { WHATS_NEW_MODAL_OPTIONS, WhatsNewModal } from '@features/whats-new-modal';
+import { getOrCreateAuditLogTab } from '@controllers/tab/audit-log-tab-controller';
+import { AuditorGuideModal } from '@features/auditor-guide';
+import { SchemaPromptHelperModal } from '@features/schema-prompt-helper';
 import { useOsModifierIcon } from '@hooks/use-os-modifier-icon';
-import { Group, Text, TextInput, Tooltip } from '@mantine/core';
-import { useLocalStorage } from '@mantine/hooks';
-import { modals } from '@mantine/modals';
+import { Badge, Button, Group, Text, TextInput, Tooltip } from '@mantine/core';
 import { spotlight } from '@mantine/spotlight';
-import { LOCAL_STORAGE_KEYS } from '@models/local-storage';
-import { IconSearch } from '@tabler/icons-react';
+import { useAuditPanelStore } from '@store/audit-panel-store';
+import {
+  IconBook,
+  IconChecklist,
+  IconHistory,
+  IconSearch,
+  IconSparkles,
+} from '@tabler/icons-react';
 import { setDataTestId } from '@utils/test-id';
 import { cn } from '@utils/ui/styles';
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 
 export const Header = memo(() => {
@@ -20,9 +26,10 @@ export const Header = memo(() => {
   const location = useLocation();
   const mod = useOsModifierIcon();
   const isSettingsPage = location.pathname.includes('settings');
-  const [lastSeenVersion] = useLocalStorage({
-    key: LOCAL_STORAGE_KEYS.WHATS_NEW_VERSION_SHOWN,
-  });
+
+  const { isOpen: auditPanelOpen, togglePanel: toggleAuditPanel } = useAuditPanelStore();
+  const [promptHelperOpened, setPromptHelperOpened] = useState(false);
+  const [auditorGuideOpened, setAuditorGuideOpened] = useState(false);
 
   const logoSection = isSettingsPage ? (
     <Group className="gap-2">
@@ -34,37 +41,22 @@ export const Header = memo(() => {
     </Group>
   ) : (
     <Group className="gap-3 cursor-default">
-      <Tooltip label="Hi, I'm Polly!" position="bottom" openDelay={500}>
+      <Tooltip label="LedgerDuck (Forked from PondPilot under AGPL-3.0 by T1A)" position="bottom" openDelay={400}>
         <div>
-          <img src={duckLogo} alt="PondPilot" className="w-8 h-8 dark:hidden" />
-          <img src={duckLogoDark} alt="PondPilot" className="w-8 h-8 hidden dark:block" />
+          <img src={duckLogo} alt="LedgerDuck" className="w-8 h-8 dark:hidden" />
+          <img src={duckLogoDark} alt="LedgerDuck" className="w-8 h-8 hidden dark:block" />
         </div>
       </Tooltip>
-      <Group gap={4} align="baseline">
-        <Text size="lg" fw={600} className="text-textPrimary-light dark:text-textPrimary-dark">
-          PondPilot
+      <Group gap={6} align="center">
+        <Text size="lg" fw={700} className="text-textPrimary-light dark:text-textPrimary-dark">
+          LedgerDuck
         </Text>
-        <Tooltip label="Release Notes" position="bottom" openDelay={500}>
-          <Text
-            size="xs"
-            c="text-secondary"
-            className="font-mono cursor-pointer hover:underline"
-            onClick={(e) => {
-              e.stopPropagation();
-              const modalId = modals.open({
-                ...WHATS_NEW_MODAL_OPTIONS,
-                children: (
-                  <WhatsNewModal
-                    onClose={() => modals.close(modalId)}
-                    lastSeenVersion={lastSeenVersion}
-                  />
-                ),
-              });
-            }}
-          >
-            {__VERSION__}
-          </Text>
-        </Tooltip>
+        <Badge size="xs" variant="light" color="blue" radius="sm">
+          Audit Edition
+        </Badge>
+        <Text size="xs" c="text-secondary" className="font-mono ml-1 select-none">
+          {__VERSION__}
+        </Text>
       </Group>
     </Group>
   );
@@ -72,25 +64,34 @@ export const Header = memo(() => {
   return (
     <>
       <SpotlightMenu />
+      <SchemaPromptHelperModal
+        opened={promptHelperOpened}
+        onClose={() => setPromptHelperOpened(false)}
+      />
+      <AuditorGuideModal
+        opened={auditorGuideOpened}
+        onClose={() => setAuditorGuideOpened(false)}
+      />
+
       <Group justify="space-between" className="h-full">
-        <Group gap={40} flex={1}>
+        <Group gap={30} flex={1}>
           {logoSection}
         </Group>
 
         <TextInput
           flex={1}
           data-testid={setDataTestId('spotlight-trigger-input')}
-          className="cursor-pointer max-w-[400px] min-w-[300px]"
+          className="cursor-pointer max-w-[360px] min-w-[240px]"
           classNames={{
             input: cn(
-              'bg-backgroundSecondary-light  border-0 placeholder-textSecondary-light  h-[38px] rounded-full ',
+              'bg-backgroundSecondary-light border-0 placeholder-textSecondary-light h-[36px] rounded-full',
               'dark:bg-backgroundSecondary-dark dark:placeholder-textSecondary-dark',
             ),
           }}
           readOnly
           leftSection={
             <Group gap={4} onClick={spotlight.open}>
-              <IconSearch size={20} className="dark:text-iconDefault-dark text-iconDefault-light" />{' '}
+              <IconSearch size={18} className="dark:text-iconDefault-dark text-iconDefault-light" />{' '}
               <Text c="text-secondary" className="text-sm">
                 Search
               </Text>
@@ -112,17 +113,53 @@ export const Header = memo(() => {
         />
 
         <Group flex={1} justify="end" gap={8}>
-          {/* // TODO: Implement this */}
-          {/* <ActionIcon size={20} disabled>
-          <IconLayoutSidebarFilled />
-        </ActionIcon>
-        <ActionIcon size={20} disabled>
-          <IconLayoutBottombarFilled />
-        </ActionIcon>
-        <Divider orientation="vertical" />
-          <ActionIcon size={20} disabled>
-            <IconLayout />
-          </ActionIcon> */}
+          <Tooltip label={auditPanelOpen ? "Hide Right Audit Panel" : "Show Right Audit Panel (Templates & Query Manager)"}>
+            <Button
+              size="xs"
+              variant={auditPanelOpen ? 'filled' : 'light'}
+              color="blue"
+              leftSection={<IconChecklist size={14} />}
+              onClick={toggleAuditPanel}
+            >
+              Audit Panel
+            </Button>
+          </Tooltip>
+
+          <Tooltip label="Open Zero-Knowledge AI Prompt Helper (No data leaves your device)">
+            <Button
+              size="xs"
+              variant="subtle"
+              color="gray"
+              leftSection={<IconSparkles size={14} />}
+              onClick={() => setPromptHelperOpened(true)}
+            >
+              AI Helper
+            </Button>
+          </Tooltip>
+
+          <Tooltip label="View Audit Trail & SQL Execution Log">
+            <Button
+              size="xs"
+              variant="subtle"
+              color="gray"
+              leftSection={<IconHistory size={15} />}
+              onClick={() => getOrCreateAuditLogTab({ setActive: true })}
+            >
+              Audit Trail
+            </Button>
+          </Tooltip>
+
+          <Tooltip label="Auditor User Guide & Readme">
+            <Button
+              size="xs"
+              variant="subtle"
+              color="gray"
+              leftSection={<IconBook size={15} />}
+              onClick={() => setAuditorGuideOpened(true)}
+            >
+              Guide
+            </Button>
+          </Tooltip>
         </Group>
       </Group>
     </>
