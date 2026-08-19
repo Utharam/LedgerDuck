@@ -169,16 +169,18 @@ export default defineConfig(({ mode }) => {
         },
         manifest: {
           display_override: ['window-controls-overlay'],
-          categories: ['productivity'],
+          categories: ['finance', 'productivity', 'business'],
           launch_handler: {
             client_mode: 'focus-existing',
           },
-          name: 'PondPilot',
-          short_name: 'PondPilot',
+          name: 'LedgerDuck - Audit SQL Workspace',
+          short_name: 'LedgerDuck',
+          description: 'Zero-knowledge, privacy-first SQL investigation workspace for financial auditors and accountants.',
           start_url: basePath,
+          scope: basePath,
           display: 'standalone',
           background_color: '#ffffff',
-          theme_color: '#000000',
+          theme_color: '#228be6',
           icons: [
             {
               src: './assets/pwa-icons/192.png',
