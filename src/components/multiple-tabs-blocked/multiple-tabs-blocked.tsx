@@ -39,7 +39,7 @@ export const MultipleTabsBlocked = ({ onTakeOver }: MultipleTabsBlockedProps) =>
               Multiple Tabs Detected
             </Title>
             <Text size="md" ta="center">
-              PondPilot is already running in another tab. Please use only one tab at a time.
+              LedgerDuck is already running in another tab. Please use only one tab at a time.
             </Text>
           </Stack>
           <Stack align="center" className="mt-8" gap={16}>
@@ -48,7 +48,7 @@ export const MultipleTabsBlocked = ({ onTakeOver }: MultipleTabsBlockedProps) =>
               Why only one tab?
             </Title>
             <Text size="md" ta="center">
-              PondPilot works with local files and databases. Running multiple tabs simultaneously
+              LedgerDuck works with local files and databases. Running multiple tabs simultaneously
               could cause data conflicts and corruption.
             </Text>
             <Stack gap={8} className="mt-4">

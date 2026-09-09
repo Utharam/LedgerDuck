@@ -387,7 +387,7 @@ export const AISettings = () => {
         /* Polly AI - show info instead of model selector */
         <Alert icon={<IconSparkles size={16} />} color="background-accent" variant="light">
           <Text size="sm">
-            <strong>Polly</strong> is PondPilot&apos;s built-in AI assistant, ready to help with
+            <strong>Polly</strong> is LedgerDuck&apos;s built-in AI assistant, ready to help with
             your SQL queries. No configuration required!
           </Text>
           <Text size="sm" c="dimmed" mt="xs">
@@ -430,7 +430,7 @@ export const AISettings = () => {
         <Text size="sm">
           <strong>Privacy Notice:</strong> When using AI assistance, your SQL queries and database
           schema information are sent to{' '}
-          {isPolly ? "PondPilot's servers" : currentProvider?.name || 'the selected AI provider'}.
+          {isPolly ? "LedgerDuck's servers" : currentProvider?.name || 'the selected AI provider'}.
           {isPolly
             ? ' Polly uses Claude under the hood to process your requests.'
             : " Ensure this complies with your organization's data privacy policies. API keys are securely stored in your browser's cookies."}

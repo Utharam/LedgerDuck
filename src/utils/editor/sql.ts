@@ -412,7 +412,7 @@ export const validateStatements = (
       const tableName = extractDropTarget(statement.code);
       if (tableName && protectedViewNames.includes(tableName.toLowerCase())) {
         errors.push(
-          `Cannot drop object \`${tableName}\` as it is managed by PondPilot (file views and comparison tables are protected).`,
+          `Cannot drop object \`${tableName}\` as it is managed by LedgerDuck (file views and comparison tables are protected).`,
         );
       }
     }

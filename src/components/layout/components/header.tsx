@@ -41,7 +41,7 @@ export const Header = memo(() => {
     </Group>
   ) : (
     <Group className="gap-3 cursor-default">
-      <Tooltip label="LedgerDuck (Forked from PondPilot under AGPL-3.0 by T1A)" position="bottom" openDelay={400}>
+      <Tooltip label="LedgerDuck - Audit SQL Workspace" position="bottom" openDelay={400}>
         <div>
           <img src={duckLogo} alt="LedgerDuck" className="w-8 h-8 dark:hidden" />
           <img src={duckLogoDark} alt="LedgerDuck" className="w-8 h-8 hidden dark:block" />

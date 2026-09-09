@@ -89,7 +89,7 @@ test.describe('Polly AI Settings Integration', () => {
 
       // Should show the built-in info alert
       const pollyInfo = settingsPage.getByText(
-        /PondPilot's built-in AI assistant.*No configuration required/,
+        /LedgerDuck's built-in AI assistant.*No configuration required/,
       );
       await expect(pollyInfo).toBeVisible();
 
@@ -109,7 +109,7 @@ test.describe('Polly AI Settings Integration', () => {
       await expect(pollyBadge).toBeVisible();
     });
 
-    test('should show privacy notice for Polly mentioning PondPilot servers', async ({
+    test('should show privacy notice for Polly mentioning LedgerDuck servers', async ({
       openSettings,
     }) => {
       const settingsPage = await openSettings();
@@ -117,8 +117,8 @@ test.describe('Polly AI Settings Integration', () => {
       // Wait for settings to load
       await expect(settingsPage.getByText('AI Provider')).toBeVisible({ timeout: 10000 });
 
-      // Find privacy notice mentioning PondPilot's servers
-      const privacyNotice = settingsPage.getByText(/PondPilot's servers/);
+      // Find privacy notice mentioning LedgerDuck's servers
+      const privacyNotice = settingsPage.getByText(/LedgerDuck's servers/);
       await expect(privacyNotice).toBeVisible();
 
       // Also check for Claude mention

@@ -60,7 +60,7 @@ describe('buildDatabaseNode', () => {
   });
 
   describe('system database node building', () => {
-    it('should build system database node with PondPilot label', () => {
+    it('should build system database node with LedgerDuck label', () => {
       const systemDb: LocalDB = {
         id: 'system-db' as PersistentDataSourceId,
         type: 'attached-db',
@@ -81,7 +81,7 @@ describe('buildDatabaseNode', () => {
 
       const node = buildDatabaseNode(systemDb, true, mockContext);
 
-      expect(node.label).toBe('PondPilot');
+      expect(node.label).toBe('LedgerDuck');
       expect(node.iconType).toBe('duck');
       expect(node.onDelete).toBeUndefined();
       expect(node.renameCallbacks).toBeUndefined();

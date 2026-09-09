@@ -125,7 +125,7 @@ export async function refreshDatabaseMetadata(
         title: 'Failed to clean comparison tables',
         message: `Some stored comparison tables could not be removed automatically: ${orphanDropFailures.join(
           ', ',
-        )}. You can drop them manually from the PondPilot database.`,
+        )}. You can drop them manually from the LedgerDuck database.`,
       });
     }
   } catch (error) {

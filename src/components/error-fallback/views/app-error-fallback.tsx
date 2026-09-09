@@ -77,7 +77,7 @@ export const AppErrorFallback = () => {
             {exportError && (
               <Box bg="red.0" p="md" mt="md" style={{ borderRadius: '8px' }}>
                 <Text c="red" fw={500}>
-                  Unfortunately, export failed. This means that PondPilot won&apos;t be able to
+                  Unfortunately, export failed. This means that LedgerDuck won&apos;t be able to
                   restore your scripts. We are really sorry for this inconvenience.
                 </Text>
                 <Text mt="sm">

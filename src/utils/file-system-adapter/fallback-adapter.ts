@@ -69,8 +69,8 @@ export class FallbackFileSystemAdapter implements FileSystemAdapter {
     }
 
     const recommendations = [
-      'For the best experience with PondPilot, we recommend using Google Chrome or Microsoft Edge.',
-      `${name} users can still use PondPilot, but some features like persistent file access are limited.`,
+      'For the best experience with LedgerDuck, we recommend using Google Chrome or Microsoft Edge.',
+      `${name} users can still use LedgerDuck, but some features like persistent file access are limited.`,
     ];
 
     return {

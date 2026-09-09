@@ -54,7 +54,7 @@ export const useSystemDbNode = ({
   const systemDbNodeForDisplay: TreeNodeData<DataExplorerNodeTypeMap> = systemDbNode || {
     nodeType: 'db' as const,
     value: SYSTEM_DATABASE_ID,
-    label: 'PondPilot',
+    label: 'LedgerDuck',
     iconType: 'duck' as const,
     isDisabled: false,
     isSelectable: false,

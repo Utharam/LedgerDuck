@@ -114,7 +114,7 @@ export const OnboardingModalContent = ({ onClose }: { onClose: () => void }) => 
         <Text size="xs" c="text-secondary">
           Created with ❤️ by{' '}
           <a
-            href="https://utharam.github.io/"
+            href="https://utharam.in/"
             target="_blank"
             rel="noopener noreferrer"
             className="text-blue-500 hover:underline font-medium"

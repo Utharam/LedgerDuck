@@ -117,7 +117,7 @@ export function buildDatabaseNode(
   let dbLabel = dbName;
   // Check both isSystemDb flag and dbName for backward compatibility
   if (isSystemDb || dbName === PERSISTENT_DB_NAME) {
-    dbLabel = 'PondPilot';
+    dbLabel = 'LedgerDuck';
   } else if (localFile) {
     dbLabel = getLocalDBDataSourceName(dbName, localFile);
   }

@@ -33,7 +33,7 @@ test('Should handle CSV schema changes when sorting after file modification', as
   const csvPath = testTmp.join('bug-118-test.csv');
   createFile(csvPath, 'id,name\n1,Alice\n2,Bob');
 
-  // Step 2: Upload and add file to PondPilot
+  // Step 2: Upload and add file to LedgerDuck
   await storage.uploadFile(csvPath, 'bug-118-test.csv');
   await filePicker.selectFiles(['bug-118-test.csv']);
   await addFile();

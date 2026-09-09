@@ -55,7 +55,7 @@ export function BrowserCompatibilityAlert() {
       messages.push({
         feature: 'Session Persistence',
         status: 'unavailable',
-        description: "You'll need to re-select files when you return to PondPilot",
+        description: "You'll need to re-select files when you return to LedgerDuck",
       });
     }
 
@@ -77,7 +77,7 @@ export function BrowserCompatibilityAlert() {
         icon={<IconAlertCircle size={16} />}
         title={
           <Group justify="space-between" style={{ width: '100%' }}>
-            <Text fw={500}>{browserInfo.name} has limited PondPilot features</Text>
+            <Text fw={500}>{browserInfo.name} has limited LedgerDuck features</Text>
             <Button
               size="xs"
               variant="subtle"

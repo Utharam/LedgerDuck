@@ -19,7 +19,7 @@ export const DesktopOnly = () => {
               Desktop Only
             </Title>
             <Text ta="center">
-              PondPilot doesn&apos;t work on mobile.
+              LedgerDuck doesn&apos;t work on mobile.
               <br />
               Please switch to a desktop.
             </Text>

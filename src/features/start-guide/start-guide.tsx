@@ -346,7 +346,7 @@ export const StartGuide = () => {
               LedgerDuck v0.10.0 · 100% In-Browser Privacy
             </Text>
             <Anchor
-              href="https://utharam.github.io/"
+              href="https://utharam.in/"
               target="_blank"
               rel="noopener noreferrer"
               style={{ textDecoration: 'none' }}

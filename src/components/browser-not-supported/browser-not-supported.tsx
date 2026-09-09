@@ -38,7 +38,7 @@ export const BrowserNotSupported = () => {
               Unsupported Browser
             </Title>
             <Text size="md" ta="center">
-              We’re sorry, but you have to use Chrome or Edge to use PondPilot.
+              We’re sorry, but you have to use Chrome or Edge to use LedgerDuck.
             </Text>
           </Stack>
           <Stack align="center" className="mt-8" gap={16}>
@@ -47,7 +47,7 @@ export const BrowserNotSupported = () => {
               But Why?..
             </Title>
             <Text size="md" ta="center">
-              Because web “standards” <span className="text-xl">💀💀💀</span> .<br /> PondPilot uses
+              Because web “standards” <span className="text-xl">💀💀💀</span> .<br /> LedgerDuck uses
               a cutting-edge{' '}
               <a
                 href="https://developer.mozilla.org/en-US/docs/Web/API/File_System_API"

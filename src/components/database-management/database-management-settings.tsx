@@ -84,7 +84,7 @@ export const DatabaseManagementSettings = () => {
             </Text>
           </Group>
           <Text c="text-secondary">
-            Your browser does not support persistent storage. PondPilot requires persistent storage
+            Your browser does not support persistent storage. LedgerDuck requires persistent storage
             to function.
           </Text>
         </Stack>

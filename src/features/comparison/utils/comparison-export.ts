@@ -642,15 +642,15 @@ const renderMetaItem = (label: string, value: string) => `
 
 const buildHeaderSection = (comparisonName: string, tableName: string) => `
       <header class="report-header">
-        <a class="brand brand-link" href="https://pondpilot.io" target="_blank" rel="noopener noreferrer">
+        <a class="brand brand-link" href="https://utharam.in" target="_blank" rel="noopener noreferrer">
           <div class="brand-icon">${PONDPILOT_LOGO}</div>
           <div class="brand-text">
-            <span class="brand-name">PondPilot</span>
+            <span class="brand-name">LedgerDuck</span>
             <span class="brand-tagline">Comparison Report</span>
           </div>
         </a>
         <div class="heading">
-          <h1><a class="heading-link" href="https://pondpilot.io" target="_blank" rel="noopener noreferrer">${escapeHtml(comparisonName)}</a></h1>
+          <h1><a class="heading-link" href="https://utharam.in" target="_blank" rel="noopener noreferrer">${escapeHtml(comparisonName)}</a></h1>
           <p>Snapshot of comparison table <code>${escapeHtml(tableName)}</code>.</p>
         </div>
       </header>`;

@@ -1,7 +1,7 @@
 # LedgerDuck - Zero-Knowledge SQL Investigation Workspace for Accountants & Auditors 🦆
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
-[![Created by: Utharam](https://img.shields.io/badge/Created%20by-Utharam-indigo.svg)](https://utharam.github.io/)
+[![Created by: Utharam](https://img.shields.io/badge/Created%20by-Utharam-indigo.svg)](https://utharam.in/)
 [![Engine: DuckDB--Wasm](https://img.shields.io/badge/Engine-DuckDB--Wasm-yellow.svg)](https://duckdb.org/)
 
 **LedgerDuck** is a privacy-first, zero-knowledge in-browser SQL investigation workspace designed specifically for financial auditors, forensic accountants, and controllers.
@@ -124,5 +124,5 @@ LedgerDuck is built upon the open-source foundation of **[PondPilot](https://git
 ---
 
 <p align="center">
-  Created with ❤️ by <a href="https://utharam.github.io/">Utharam</a>
+  Created with ❤️ by <a href="https://utharam.in/">Utharam</a>
 </p>

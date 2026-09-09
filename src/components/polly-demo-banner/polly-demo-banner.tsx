@@ -100,7 +100,7 @@ export function PollyDemoBanner({
       classNames={{ title: 'text-textPrimary-light dark:text-textPrimary-dark' }}
     >
       <Text size="sm" mb="sm">
-        You&apos;re using Polly, PondPilot&apos;s built-in AI assistant. It&apos;s ready to help
+        You&apos;re using Polly, LedgerDuck&apos;s built-in AI assistant. It&apos;s ready to help
         with your SQL queries right away!
       </Text>
       <Text size="sm" c="dimmed" mb="sm">

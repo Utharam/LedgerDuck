@@ -74,7 +74,7 @@ export function ImportScriptModalContent({ onClose }: ImportScriptModalContentPr
 
       <TextInput
         ref={inputRef}
-        placeholder="https://app.pondpilot.io/shared-script/..."
+        placeholder="https://.../shared-script/..."
         value={url}
         onChange={setUrl}
         data-testid={setDataTestId('import-script-url-input')}

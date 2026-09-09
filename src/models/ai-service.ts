@@ -61,7 +61,7 @@ export const AI_PROVIDERS: AIProvider[] = [
         id: 'polly',
         name: 'Polly',
         description:
-          "PondPilot's built-in AI assistant. Limited usage - add your own API key for production.",
+          "LedgerDuck's built-in AI assistant. Limited usage - add your own API key for production.",
       },
     ],
   },

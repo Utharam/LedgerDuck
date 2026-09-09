@@ -42,7 +42,7 @@ export const settingsConfig: SettingsConfig = {
         {
           id: 'cors-proxy',
           title: 'CORS Proxy',
-          description: 'Configure how PondPilot accesses remote databases.',
+          description: 'Configure how LedgerDuck accesses remote databases.',
           component: CorsProxySettings,
         },
       ],
