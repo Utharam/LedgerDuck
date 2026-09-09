@@ -21,17 +21,17 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "check:bundle": "node scripts/check-bundle-size.mjs",
-    "build:test": "yarn build --mode int-test-build",
-    "test": "yarn build:test && playwright test",
+    "build:test": "npm run build -- --mode int-test-build",
+    "test": "npm run build:test && playwright test",
     "test:no-build": "playwright test",
     "test:docker": "./docker-playwright.sh test",
     "test:unit": "jest",
     "test:unit:coverage": "jest --coverage",
-    "test:all": "yarn test:unit && yarn test",
-    "preview": "yarn build --mode int-test-build && vite preview",
+    "test:all": "npm run test:unit && npm test",
+    "preview": "npm run build -- --mode int-test-build && vite preview",
     "typecheck": "tsc --noEmit",
-    "lint": "yarn lint:eslint && yarn lint:stylelint",
-    "lint:fix": "yarn lint:eslint:fix && yarn lint:stylelint:fix",
+    "lint": "npm run lint:eslint && npm run lint:stylelint",
+    "lint:fix": "npm run lint:eslint:fix && npm run lint:stylelint:fix",
     "lint:eslint": "eslint . --cache",
     "lint:eslint:fix": "eslint . --cache --fix",
     "lint:stylelint": "stylelint '**/*.css' --cache",
@@ -128,5 +128,11 @@
     "tar": "7.5.13",
     "picomatch": "4.0.4"
   },
-  "packageManager": "yarn@4.4.0"
+  "overrides": {
+    "serialize-javascript": "7.0.5",
+    "lodash": "4.18.1",
+    "flatted": "3.4.2",
+    "tar": "7.5.13",
+    "picomatch": "4.0.4"
+  }
 }
