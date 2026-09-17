@@ -54,8 +54,8 @@ describe('Audit Templates & Column Auto-Detection', () => {
     expect(dupSql).toContain('HAVING COUNT(*) > 1');
 
     const roundSql = AUDIT_TEMPLATES.find((t) => t.id === 'round-sum-audit')!.generateSql(tableName, mapping);
-    expect(roundSql).toContain('CAST(txn_amount AS BIGINT) = txn_amount');
-    expect(roundSql).toContain('ABS(txn_amount) >= 1000');
+    expect(roundSql).toContain('TRY_CAST(txn_amount AS BIGINT)');
+    expect(roundSql).toContain('ABS(TRY_CAST(txn_amount AS DOUBLE)) >= 1000');
 
     const weekendSql = AUDIT_TEMPLATES.find((t) => t.id === 'weekend-bookings')!.generateSql(tableName, mapping);
     expect(weekendSql).toContain('DAYOFWEEK(TRY_CAST(booking_date AS DATE)) IN (1, 7)');

@@ -3,9 +3,6 @@
  * Licensed under AGPL-3.0
  */
 
-import { showSuccess } from '@components/app-notifications';
-import { createSQLScript } from '@controllers/sql-script';
-import { getOrCreateTabFromScript } from '@controllers/tab';
 import {
   ActionIcon,
   Badge,
@@ -20,7 +17,6 @@ import {
 } from '@mantine/core';
 import { useClipboard } from '@mantine/hooks';
 import { AuditColumnMapping, AuditTemplate } from '@models/audit-template';
-import { useAppStore } from '@store/app-store';
 import { IconCode, IconCopy, IconFilePlus, IconPlayerPlay, IconPlus } from '@tabler/icons-react';
 import { getActiveScriptTab, insertOrOpenQuery } from '@utils/editor-insert';
 import { useState } from 'react';
@@ -40,7 +36,6 @@ export const TemplateCard = ({
 }: TemplateCardProps) => {
   const [showSql, setShowSql] = useState(false);
   const clipboard = useClipboard({ timeout: 2000 });
-  const activeTabId = useAppStore((state) => state.activeTabId);
   const activeScript = getActiveScriptTab();
 
   const generatedSql = tableName ? template.generateSql(tableName, mapping) : '';
@@ -128,7 +123,7 @@ export const TemplateCard = ({
         <Group gap={6} className="mt-1" grow>
           {activeScript ? (
             <>
-              <Tooltip label={`Append query to "${activeScript.scriptName}"`}>
+              <Tooltip label="Adds this check to your open query. Press Run there to execute it.">
                 <Button
                   size="xs"
                   variant="light"
@@ -137,10 +132,10 @@ export const TemplateCard = ({
                   disabled={disabled || !tableName}
                   onClick={handleInsertActive}
                 >
-                  Insert in Active
+                  Add to open query
                 </Button>
               </Tooltip>
-              <Tooltip label="Open query in a new script tab">
+              <Tooltip label="Opens this check in its own query tab. Press Run there to execute it.">
                 <Button
                   size="xs"
                   variant="filled"
@@ -149,22 +144,24 @@ export const TemplateCard = ({
                   disabled={disabled || !tableName}
                   onClick={handleOpenNewTab}
                 >
-                  New Tab
+                  Open this check
                 </Button>
               </Tooltip>
             </>
           ) : (
-            <Button
-              size="xs"
-              variant="filled"
-              color="blue"
-              leftSection={<IconPlayerPlay size={12} />}
-              disabled={disabled || !tableName}
-              onClick={handleOpenNewTab}
-              fullWidth
-            >
-              Run in New Tab
-            </Button>
+            <Tooltip label="Opens this check in a query tab. Press Run there to execute it.">
+              <Button
+                size="xs"
+                variant="filled"
+                color="blue"
+                leftSection={<IconPlayerPlay size={12} />}
+                disabled={disabled || !tableName}
+                onClick={handleOpenNewTab}
+                fullWidth
+              >
+                Open this check
+              </Button>
+            </Tooltip>
           )}
         </Group>
       </Stack>

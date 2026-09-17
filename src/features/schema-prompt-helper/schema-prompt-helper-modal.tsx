@@ -138,8 +138,8 @@ export const SchemaPromptHelperModal: React.FC<SchemaPromptHelperModalProps> = (
     if (!formattedPrompt) return;
     clipboard.copy(formattedPrompt);
     showSuccess({
-      title: 'Prompt Copied!',
-      message: 'Zero-knowledge schema prompt copied. Paste it into ChatGPT, Claude, or Gemini.',
+      title: 'Safe summary copied!',
+      message: 'Paste it into ChatGPT, Claude, or Gemini. No amounts, names, or row data are included.',
       autoClose: 3000,
     });
   };
@@ -155,10 +155,10 @@ export const SchemaPromptHelperModal: React.FC<SchemaPromptHelperModalProps> = (
           </ThemeIcon>
           <div>
             <Text fw={600} size="sm" c="text-primary">
-              Zero-Knowledge Schema-to-Prompt Helper
+              Ask ChatGPT safely
             </Text>
             <Text size="xs" c="text-secondary">
-              Generate structured LLM prompts for ChatGPT, Claude, or Gemini without sharing data
+              Describe what you want in plain words. Only column names leave this page — never amounts or names.
             </Text>
           </div>
         </Group>
@@ -171,22 +171,24 @@ export const SchemaPromptHelperModal: React.FC<SchemaPromptHelperModalProps> = (
         {/* Zero-Knowledge Privacy Guarantee Banner */}
         <Alert
           icon={<IconLockCheck size={18} />}
-          title="100% Zero-Knowledge Privacy Guarantee"
+          title="ChatGPT will see only what you preview below"
           color="teal"
           variant="light"
           radius="sm"
           className="text-xs"
         >
           <Text size="xs" c="teal.9">
-            <strong>Zero financial row data is sent or read.</strong> Only structural metadata (table & column names) is extracted into a text template for you to copy.
+            <strong>Only your sheet and column names are copied — no amounts, names, or row data.</strong>{' '}
+            Why paste it yourself? Sending your data to an AI directly would break our privacy
+            promise, so LedgerDuck prepares a safe summary instead.
           </Text>
         </Alert>
 
         {/* Table Selector */}
         <Group align="flex-end" justify="space-between">
           <Select
-            label="Target Dataset Table / View"
-            placeholder="Select table"
+            label="Which Excel sheet should I check?"
+            placeholder="Select sheet"
             data={tables.map((t) => ({ value: t.tableName, label: t.tableName }))}
             value={selectedTableName || null}
             onChange={(val) => val && setSelectedTableName(val)}
@@ -202,7 +204,7 @@ export const SchemaPromptHelperModal: React.FC<SchemaPromptHelperModalProps> = (
         {selectedTable && (
           <Box>
             <Text size="xs" fw={600} mb={6} c="text-secondary">
-              Click column pills to insert into your intent:
+              Tap a column name to mention it in your question:
             </Text>
             <ScrollArea.Autosize mah={90}>
               <Group gap={6} wrap="wrap">
@@ -230,7 +232,7 @@ export const SchemaPromptHelperModal: React.FC<SchemaPromptHelperModalProps> = (
         {/* Audit Objective Presets */}
         <Box>
           <Text size="xs" fw={600} mb={4} c="text-secondary">
-            Quick Audit Presets:
+            Not sure what to ask? Try one:
           </Text>
           <Group gap={4} wrap="wrap">
             {AUDIT_PROMPT_PRESETS.map((preset, idx) => (
@@ -251,8 +253,8 @@ export const SchemaPromptHelperModal: React.FC<SchemaPromptHelperModalProps> = (
         {/* Intent Textarea */}
         <Textarea
           ref={intentInputRef}
-          label="Your Audit Objective / Question"
-          placeholder="e.g. Find all transactions where amount is greater than $50,000 on weekends, grouped by vendor..."
+          label="What do you want to find out?"
+          placeholder="e.g. Show me payments above $50,000 posted on weekends, grouped by vendor..."
           minRows={3}
           maxRows={6}
           autosize
@@ -270,7 +272,7 @@ export const SchemaPromptHelperModal: React.FC<SchemaPromptHelperModalProps> = (
               color="gray"
               onClick={() => setShowPreview((prev) => !prev)}
             >
-              {showPreview ? 'Hide Full Formatted Prompt' : 'Preview Full Formatted Prompt'}
+              {showPreview ? 'Hide what ChatGPT will receive' : 'See exactly what ChatGPT will receive'}
             </Button>
           </Group>
 
@@ -299,7 +301,7 @@ export const SchemaPromptHelperModal: React.FC<SchemaPromptHelperModalProps> = (
             disabled={!selectedTable}
             onClick={handleCopyPrompt}
           >
-            {clipboard.copied ? 'Copied to Clipboard!' : 'Copy Formatted Prompt'}
+            {clipboard.copied ? 'Safe summary copied!' : 'Copy safe summary'}
           </Button>
         </Group>
       </Stack>

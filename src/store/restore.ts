@@ -973,11 +973,11 @@ export const restoreAppDataFromIDB = async (
           const skippedSheets: string[] = [];
           // Create data sources for new sheets
           for (const sheetName of newSheets) {
-            const sheetDataSource = addXlsxSheetDataSource(localEntry, sheetName, _reservedViews);
+            const sheetDataSource = addXlsxSheetDataSource(localEntry, sheetName, _reservedViews, true);
             _reservedViews.add(sheetDataSource.viewName);
             missingDataSources.set(sheetDataSource.id, sheetDataSource);
             try {
-              await createXlsxSheetView(conn, fileName, sheetName, sheetDataSource.viewName);
+              await createXlsxSheetView(conn, fileName, sheetName, sheetDataSource.viewName, true);
               validDataSources.add(sheetDataSource.id);
               succeededSheets.push(sheetName);
             } catch (err) {
@@ -993,7 +993,13 @@ export const restoreAppDataFromIDB = async (
           // Register existing sheets
           for (const dataSource of existingDataSources) {
             try {
-              await createXlsxSheetView(conn, fileName, dataSource.sheetName, dataSource.viewName);
+              await createXlsxSheetView(
+                conn,
+                fileName,
+                dataSource.sheetName,
+                dataSource.viewName,
+                dataSource.hasHeader ?? true,
+              );
               validDataSources.add(dataSource.id);
               succeededSheets.push(dataSource.sheetName);
             } catch (err) {

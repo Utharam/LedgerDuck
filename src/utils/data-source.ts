@@ -135,6 +135,7 @@ export function addXlsxSheetDataSource(
   localEntry: DataSourceLocalFile,
   sheetName: string,
   reservedViews: Set<string>,
+  hasHeader = true,
 ): AnyFlatFileDataSource {
   if (localEntry.ext !== 'xlsx') {
     throw new Error('Only XLSX files can be used to create sheet data sources');
@@ -152,6 +153,7 @@ export function addXlsxSheetDataSource(
     fileSourceId: localEntry.id,
     viewName,
     sheetName,
+    hasHeader,
   };
 }
 

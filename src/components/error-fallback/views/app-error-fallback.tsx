@@ -34,7 +34,11 @@ export const AppErrorFallback = () => {
     <div role="alert" data-testid={setDataTestId('error-fallback')}>
       <Stack p="lg">
         <Text size="xl" fw={700}>
-          Something went wrong 🤷‍♂️
+          LedgerDuck hit a problem
+        </Text>
+        <Text c="text-secondary" size="sm">
+          Your original Excel and data files are safe — LedgerDuck only reads them and never changes
+          them. What follows only affects this website&apos;s saved workspace.
         </Text>
 
         <ErrorStackView error={error} />
@@ -67,12 +71,13 @@ export const AppErrorFallback = () => {
               </ThemeIcon>
             }
           >
-            <Text fw={500}>2. If the error persists, export your queries</Text>
+            <Text fw={500}>2. If the error persists, save your work for support</Text>
             <Text c="text-secondary" size="sm" mt={4}>
-              This will save all your SQL scripts as a ZIP archive
+              This saves a copy of your checks and queries as a ZIP file. Your original data files are
+              not included and stay untouched.
             </Text>
             <Button onClick={exportArchive} mt="xs" disabled={exportError}>
-              Export SQL scripts
+              Save my work
             </Button>
             {exportError && (
               <Box bg="red.0" p="md" mt="md" style={{ borderRadius: '8px' }}>
@@ -98,12 +103,13 @@ export const AppErrorFallback = () => {
               </ThemeIcon>
             }
           >
-            <Text fw={500}>3. Clear application data</Text>
+            <Text fw={500}>3. Clear this website&apos;s saved data</Text>
             <Text c="text-secondary" size="sm" mt={4}>
-              After exporting, clear all data
+              After saving your work above, clear LedgerDuck&apos;s workspace. Your original files on
+              your computer are not affected.
             </Text>
             <Button variant="outline" color="text-error" onClick={deleteApplicationData} mt="xs">
-              Delete application data
+              Clear saved workspace
             </Button>
           </List.Item>
 
@@ -130,9 +136,10 @@ export const AppErrorFallback = () => {
               </ThemeIcon>
             }
           >
-            <Text fw={500}>5. Import scripts</Text>
+            <Text fw={500}>5. Restore your checks</Text>
             <Text c="text-secondary" size="sm" mt={4}>
-              After reloading, use the script import feature to restore from the ZIP file
+              After reloading, re-import the ZIP file to get your checks back, then re-open your Excel
+              sheet as usual.
             </Text>
           </List.Item>
         </List>

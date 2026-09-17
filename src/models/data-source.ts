@@ -77,6 +77,13 @@ export interface XlsxSheetView extends FlatFileDataSource {
    * Name of the sheet in the spreadsheet.
    */
   sheetName: string;
+
+  /**
+   * Whether the first row holds column names. Defaults to true when undefined
+   * (backward compatible with sheets imported before this flag existed).
+   * When false, DuckDB reads with `header = false` and generates column names.
+   */
+  hasHeader?: boolean;
 }
 
 export type AnyFlatFileDataSource = CSVView | ParquetView | XlsxSheetView | JSONView | ReadStatView;

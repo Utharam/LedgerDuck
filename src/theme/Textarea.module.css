@@ -20,7 +20,10 @@
   border: 1px solid;
   transition: all 0.2s ease;
 
-  padding: 10px 12px;
+  /* Logical inline props keep Mantine v8 wrapper section offsets working. */
+  padding-block: 10px;
+  padding-inline-start: var(--input-padding-inline-start, 12px);
+  padding-inline-end: var(--input-padding-inline-end, 12px);
 
   font-family:
     'Helvetica Neue',

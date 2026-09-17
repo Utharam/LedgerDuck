@@ -67,10 +67,11 @@ export const getAllExistingNames = (options: {
 
 export function quote(s: string, options = { single: false }): string {
   // Replace each quote with two quotes and wrap result in quotes
+  const str = String(s ?? '');
   if (options.single) {
-    return `'${s.replace(/'/g, "''")}'`;
+    return `'${str.replace(/'/g, "''")}'`;
   }
-  return `"${s.replace(/"/g, '""')}"`;
+  return `"${str.replace(/"/g, '""')}"`;
 }
 
 /**

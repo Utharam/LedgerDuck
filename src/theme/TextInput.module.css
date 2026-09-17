@@ -20,9 +20,14 @@
   border: 1px solid;
   transition: all 0.2s ease;
 
-  padding: 0 15px;
-  padding-left: var(--input-padding-left, 15px);
-  padding-right: var(--input-padding-right, 15px);
+  /* Use logical props so Mantine v8's wrapper-level section offsets flow through:
+     [data-with-left-section] / [data-with-right-section] live on the wrapper
+     and resolve --input-padding-inline-start/end. Physical padding would win
+     the cascade and bury text under the icon. */
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-inline-start: var(--input-padding-inline-start, 15px);
+  padding-inline-end: var(--input-padding-inline-end, 15px);
 
   font-family:
     'Helvetica Neue',
@@ -37,16 +42,6 @@
   background-color: var(--mantine-color-background-primary-filled);
   color: var(--mantine-color-text-primary-text);
   border-color: var(--mantine-color-border-primary-filled);
-}
-
-.input[data-with-left-section='true'],
-.input[data-with-left-section] {
-  padding-left: var(--input-left-section-width, 34px);
-}
-
-.input[data-with-right-section='true'],
-.input[data-with-right-section] {
-  padding-right: var(--input-right-section-width, 34px);
 }
 
 .input::placeholder {

@@ -8,12 +8,13 @@ import { Alert, Box, Group, ScrollArea, Stack, Text, ThemeIcon } from '@mantine/
 import { AuditColumnMapping } from '@models/audit-template';
 import { PERSISTENT_DB_NAME } from '@models/db-persistence';
 import { useAppStore } from '@store/app-store';
-import { AUDIT_TEMPLATES, autoDetectAuditColumns } from '@utils/audit-templates';
 import { IconAlertCircle, IconChecklist } from '@tabler/icons-react';
+import { AUDIT_TEMPLATES, autoDetectAuditColumns } from '@utils/audit-templates';
 import { useEffect, useMemo, useState } from 'react';
 
 import { ColumnMappingEditor } from './components/column-mapping-editor';
 import { TemplateCard } from './components/template-card';
+import { VocabularyTools } from './components/vocabulary-tools';
 
 interface TableMeta {
   fullName: string;
@@ -165,6 +166,8 @@ export const AccountingDrawer = () => {
                   disabled={!selectedTable}
                 />
               ))}
+
+              <VocabularyTools tableName={selectedTable} mapping={mapping} disabled={!selectedTable} />
             </Stack>
           </ScrollArea>
         )}

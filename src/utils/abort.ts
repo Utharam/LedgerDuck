@@ -45,13 +45,19 @@ export async function toAbortablePromise<R extends any = any, A extends () => an
   onAbort?: A;
   onFinalize?: () => void | Promise<void>;
 }) {
+  // Fast-path: already aborted — don't wait on the wrapped promise.
+  if (signal.aborted) {
+    return { value: (await onAbort?.()) || undefined, aborted: true } as any;
+  }
+  let onAbortListener: (() => void) | undefined;
   try {
     const ret = await Promise.race([
       promise,
       new Promise<never>((_, reject) => {
-        signal.addEventListener('abort', () => {
+        onAbortListener = () => {
           reject(new AbortedError());
-        });
+        };
+        signal.addEventListener('abort', onAbortListener, { once: true });
       }),
     ]);
 
@@ -62,6 +68,9 @@ export async function toAbortablePromise<R extends any = any, A extends () => an
     }
     throw error;
   } finally {
+    if (onAbortListener) {
+      signal.removeEventListener('abort', onAbortListener);
+    }
     await onFinalize?.();
   }
 }

@@ -6,14 +6,19 @@ import { getOrCreateAuditLogTab } from '@controllers/tab/audit-log-tab-controlle
 import { AuditorGuideModal } from '@features/auditor-guide';
 import { SchemaPromptHelperModal } from '@features/schema-prompt-helper';
 import { useOsModifierIcon } from '@hooks/use-os-modifier-icon';
-import { Badge, Button, Group, Text, TextInput, Tooltip } from '@mantine/core';
+import { Badge, Button, Group, SegmentedControl, Text, TextInput, Tooltip } from '@mantine/core';
+import { useHotkeys } from '@mantine/hooks';
 import { spotlight } from '@mantine/spotlight';
 import { useAuditPanelStore } from '@store/audit-panel-store';
+import { AppRoom, useRoomStore } from '@store/room-store';
 import {
   IconBook,
   IconChecklist,
+  IconDatabase,
   IconHistory,
+  IconNetwork,
   IconSearch,
+  IconShieldCheck,
   IconSparkles,
 } from '@tabler/icons-react';
 import { setDataTestId } from '@utils/test-id';
@@ -28,8 +33,15 @@ export const Header = memo(() => {
   const isSettingsPage = location.pathname.includes('settings');
 
   const { isOpen: auditPanelOpen, togglePanel: toggleAuditPanel } = useAuditPanelStore();
+  const { activeRoom, setActiveRoom } = useRoomStore();
   const [promptHelperOpened, setPromptHelperOpened] = useState(false);
   const [auditorGuideOpened, setAuditorGuideOpened] = useState(false);
+
+  useHotkeys([
+    ['Alt+1', () => setActiveRoom('query')],
+    ['Alt+2', () => setActiveRoom('forensic')],
+    ['Alt+3', () => setActiveRoom('vocabulary')],
+  ]);
 
   const logoSection = isSettingsPage ? (
     <Group className="gap-2">
@@ -73,9 +85,52 @@ export const Header = memo(() => {
         onClose={() => setAuditorGuideOpened(false)}
       />
 
-      <Group justify="space-between" className="h-full">
-        <Group gap={30} flex={1}>
+      <Group justify="space-between" className="h-full" wrap="nowrap">
+        <Group gap={20} align="center" wrap="nowrap">
           {logoSection}
+          {!isSettingsPage && (
+            <SegmentedControl
+              size="xs"
+              value={activeRoom}
+              onChange={(val) => setActiveRoom(val as AppRoom)}
+              data={[
+                {
+                  value: 'query',
+                  label: (
+                    <Tooltip label="Query Room (Alt+1) - SQL Editor & Explorer" position="bottom" openDelay={400}>
+                      <Group gap={6} wrap="nowrap">
+                        <IconDatabase size={13} />
+                        <Text size="xs" fw={600}>Query</Text>
+                      </Group>
+                    </Tooltip>
+                  ),
+                },
+                {
+                  value: 'forensic',
+                  label: (
+                    <Tooltip label="Forensic Room (Alt+2) - Substantive Audit Tests & Automation" position="bottom" openDelay={400}>
+                      <Group gap={6} wrap="nowrap">
+                        <IconShieldCheck size={13} />
+                        <Text size="xs" fw={600}>Forensic</Text>
+                      </Group>
+                    </Tooltip>
+                  ),
+                },
+                {
+                  value: 'vocabulary',
+                  label: (
+                    <Tooltip label="Vocabulary Map (Alt+3) - Narration & Ledger Head Scrutiny" position="bottom" openDelay={400}>
+                      <Group gap={6} wrap="nowrap">
+                        <IconNetwork size={13} />
+                        <Text size="xs" fw={600}>Vocabulary</Text>
+                      </Group>
+                    </Tooltip>
+                  ),
+                },
+              ]}
+              radius="sm"
+            />
+          )}
         </Group>
 
         <TextInput

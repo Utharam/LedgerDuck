@@ -4,7 +4,14 @@
  */
 
 import { AuditColumnMapping, AuditTemplate } from '@models/audit-template';
+
 import { toDuckDBIdentifier } from './duckdb/identifier';
+import {
+  buildDatasetProfileSql,
+  buildLedgerBucketsSql,
+  buildNarrationVariantsSql,
+  buildVocabularyFrequencySql,
+} from './vocabulary';
 
 interface ColumnInfo {
   name: string;
@@ -99,13 +106,12 @@ export function autoDetectAuditColumns(columns: (string | ColumnInfo)[]): AuditC
     }
   }
 
-  // Fallbacks if not matched: pick the first unused columns
-  const firstUnused = (exclude: string[]) => colList.find((c) => !exclude.includes(c.name))?.name || '';
-
-  if (!detectedDate) detectedDate = firstUnused([]);
-  if (!detectedParticulars) detectedParticulars = firstUnused([detectedDate]);
-  if (!detectedAmount) detectedAmount = firstUnused([detectedDate, detectedParticulars]);
-  if (!detectedCategory) detectedCategory = firstUnused([detectedDate, detectedParticulars, detectedAmount]);
+  // Fallbacks: leave unmapped rather than guessing arbitrary columns.
+  // Arbitrary assignment (col0=date, col1=particulars...) misleads auditors.
+  if (!detectedDate) detectedDate = '';
+  if (!detectedParticulars) detectedParticulars = '';
+  if (!detectedAmount) detectedAmount = '';
+  if (!detectedCategory) detectedCategory = '';
 
   return {
     dateColumn: detectedDate,
@@ -118,16 +124,43 @@ export function autoDetectAuditColumns(columns: (string | ColumnInfo)[]): AuditC
 /**
  * Formats a table identifier for DuckDB.
  * If qualified (e.g. db.schema.table), quotes each segment individually.
+ * Respects double-quoted segments containing dots.
  */
 export function toDuckDBTableIdentifier(tableName: string): string {
-  if (!tableName) return 'table_name';
-  if (tableName.includes('.')) {
-    return tableName
-      .split('.')
-      .map((part) => toDuckDBIdentifier(part))
-      .join('.');
+  if (!tableName || !tableName.trim()) throw new Error('toDuckDBTableIdentifier: empty table name');
+  const parts: string[] = [];
+  let current = '';
+  let inQuotes = false;
+  const trimmed = tableName.trim();
+  for (let i = 0; i < trimmed.length; i++) {
+    const ch = trimmed[i];
+    if (ch === '"') {
+      // Handle escaped "" inside quoted identifier
+      if (inQuotes && trimmed[i + 1] === '"') {
+        current += '""';
+        i++;
+        continue;
+      }
+      inQuotes = !inQuotes;
+      current += ch;
+      continue;
+    }
+    if (ch === '.' && !inQuotes) {
+      parts.push(current);
+      current = '';
+      continue;
+    }
+    current += ch;
   }
-  return toDuckDBIdentifier(tableName);
+  parts.push(current);
+  return parts
+    .map((part) => {
+      const p = part.trim();
+      // Already quoted → trust as-is
+      if (p.startsWith('"') && p.endsWith('"') && p.length >= 2) return p;
+      return toDuckDBIdentifier(p);
+    })
+    .join('.');
 }
 
 /**
@@ -174,7 +207,7 @@ export const AUDIT_TEMPLATES: AuditTemplate[] = [
       const t = toDuckDBTableIdentifier(tableName);
       const a = toDuckDBIdentifier(mapping.amountColumn || 'amount');
 
-      return `SELECT *\nFROM ${t}\nWHERE CAST(${a} AS BIGINT) = ${a}\n  AND ABS(${a}) >= 1000\nORDER BY ABS(${a}) DESC;`;
+      return `SELECT *\nFROM ${t}\nWHERE TRY_CAST(${a} AS BIGINT) = TRY_CAST(${a} AS DOUBLE)\n  AND ABS(TRY_CAST(${a} AS DOUBLE)) >= 1000\nORDER BY ABS(TRY_CAST(${a} AS DOUBLE)) DESC;`;
     },
   },
   {
@@ -187,7 +220,7 @@ export const AUDIT_TEMPLATES: AuditTemplate[] = [
       const t = toDuckDBTableIdentifier(tableName);
       const a = toDuckDBIdentifier(mapping.amountColumn || 'amount');
 
-      return `SELECT *\nFROM ${t}\nORDER BY ABS(${a}) DESC\nLIMIT 10;`;
+      return `SELECT *\nFROM ${t}\nORDER BY ABS(TRY_CAST(${a} AS DOUBLE)) DESC\nLIMIT 10;`;
     },
   },
   {
@@ -201,6 +234,50 @@ export const AUDIT_TEMPLATES: AuditTemplate[] = [
       const d = toDuckDBIdentifier(mapping.dateColumn || 'date');
 
       return `SELECT *, DAYNAME(TRY_CAST(${d} AS DATE)) AS day_of_week\nFROM ${t}\nWHERE DAYOFWEEK(TRY_CAST(${d} AS DATE)) IN (1, 7)\nORDER BY ${d} DESC;`;
+    },
+  },
+  {
+    id: 'dataset-profile',
+    title: 'Dataset Shape Check',
+    description: 'Plain-English size check: how many rows, how many different narrations and ledgers, how many blanks',
+    category: 'Vocabulary',
+    badgeColor: 'cyan',
+    generateSql: (tableName, mapping) => {
+      return buildDatasetProfileSql(tableName, {
+        particularsColumn: mapping.particularsColumn,
+        categoryColumn: mapping.categoryColumn,
+        amountColumn: mapping.amountColumn,
+      });
+    },
+  },
+  {
+    id: 'vocabulary-frequency',
+    title: 'Common Narration Words',
+    description: 'Quantized view of narration language: most-used words with row coverage (taxi, conveyance, uber…)',
+    category: 'Vocabulary',
+    badgeColor: 'cyan',
+    generateSql: (tableName, mapping) => {
+      return buildVocabularyFrequencySql(tableName, mapping.particularsColumn || 'particulars', 200);
+    },
+  },
+  {
+    id: 'ledger-buckets',
+    title: 'Ledger Buckets by Size',
+    description: 'Where do rows sit? Biggest ledger heads first — entry point for inspecting Miscellaneous buckets',
+    category: 'Vocabulary',
+    badgeColor: 'cyan',
+    generateSql: (tableName, mapping) => {
+      return buildLedgerBucketsSql(tableName, mapping.categoryColumn || 'category', 50);
+    },
+  },
+  {
+    id: 'narration-variants',
+    title: 'Possible Narration Variants',
+    description: 'Near-duplicate narrations that differ by 1–3 letters (expense vs expenses). Review only — never auto-merged',
+    category: 'Vocabulary',
+    badgeColor: 'cyan',
+    generateSql: (tableName, mapping) => {
+      return buildNarrationVariantsSql(tableName, mapping.particularsColumn || 'particulars');
     },
   },
 ];

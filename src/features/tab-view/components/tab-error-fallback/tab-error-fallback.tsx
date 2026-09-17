@@ -12,7 +12,11 @@ export const TabErrorFallback = (props: FallbackProps) => {
     <div role="alert" data-testid={setDataTestId('error-fallback')}>
       <Stack p="lg">
         <Text size="xl" fw={700}>
-          Something went wrong 🤷‍♂️
+          This view hit a problem
+        </Text>
+        <Text c="text-secondary" size="sm">
+          Your original files are safe — LedgerDuck never changes them. Only this view needs to
+          recover.
         </Text>
 
         <ErrorStackView error={normalizedError} />
@@ -45,12 +49,12 @@ export const TabErrorFallback = (props: FallbackProps) => {
               </ThemeIcon>
             }
           >
-            <Text fw={500}>2. If the error persists, close the tab</Text>
+            <Text fw={500}>2. If the error persists, close this view</Text>
             <Text c="text-secondary" size="sm" mt={4}>
-              This will delete the the tab
+              This closes the view. Your data and other views are unaffected.
             </Text>
             <Button onClick={resetErrorBoundary} mt="xs">
-              Close the tab
+              Close this view
             </Button>
           </List.Item>
         </List>

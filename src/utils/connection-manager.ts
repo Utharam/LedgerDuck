@@ -148,7 +148,8 @@ export async function testRemoteConnection(
 ): Promise<boolean> {
   try {
     // Use a simple query that should work on any database
-    const testQuery = `SELECT 1 FROM information_schema.schemata WHERE catalog_name = '${dbName}' LIMIT 1`;
+    const safeDbName = dbName.replace(/'/g, "''");
+    const testQuery = `SELECT 1 FROM information_schema.schemata WHERE catalog_name = '${safeDbName}' LIMIT 1`;
     await executeWithRetry(pool, testQuery, config);
     return true;
   } catch (error) {

@@ -54,6 +54,7 @@ import { persistAddLocalEntry, persistDeleteLocalEntry } from './persist';
 export const addLocalFileOrFolders = async (
   conn: AsyncDuckDBConnectionPool,
   handles: (FileSystemDirectoryHandle | FileSystemFileHandle)[],
+  options?: { xlsxHasHeader?: boolean },
 ): Promise<{
   skippedExistingEntries: LocalEntry[];
   skippedUnsupportedFiles: string[];
@@ -165,6 +166,8 @@ export const addLocalFileOrFolders = async (
       case 'xls':
       case 'xlsx': {
         // Excel file (.xlsx, .xls): apply ingestion guardrails (reject merged cells, check rectangular shape, sanitize headers)
+        // xlsxHasHeader=false keeps the first row as data (read_xlsx header=false).
+        const xlsxHasHeader = options?.xlsxHasHeader ?? true;
         let rawFile: File;
         try {
           rawFile = await file.handle.getFile();
@@ -176,7 +179,7 @@ export const addLocalFileOrFolders = async (
         let sanitizedFile: File;
         let sheetNames: string[];
         try {
-          const validationResult = await validateAndSanitizeSpreadsheet(rawFile);
+          const validationResult = await validateAndSanitizeSpreadsheet(rawFile, xlsxHasHeader);
           sanitizedFile = validationResult.sanitizedFile;
           sheetNames = validationResult.sheetNames;
         } catch (validationErr) {
@@ -208,10 +211,10 @@ export const addLocalFileOrFolders = async (
               regFile = await registerFileHandle(conn, file.handle, fileName, sanitizedFile);
               newRegisteredFiles.push([file.id, regFile]);
             }
-            const sheetDataSource = addXlsxSheetDataSource(file, sheetName, reservedViews);
+            const sheetDataSource = addXlsxSheetDataSource(file, sheetName, reservedViews, xlsxHasHeader);
             reservedViews.add(sheetDataSource.viewName);
             newManagedViews.push(sheetDataSource.viewName);
-            await createXlsxSheetView(conn, fileName, sheetName, sheetDataSource.viewName);
+            await createXlsxSheetView(conn, fileName, sheetName, sheetDataSource.viewName, xlsxHasHeader);
             newDataSources.push([sheetDataSource.id, sheetDataSource]);
             succeededSheets.push(sheetName);
           } catch (err) {
@@ -703,6 +706,7 @@ export const syncFiles = async (conn: AsyncDuckDBConnectionPool) => {
               dataSource.sheetName,
               dataSource.viewName,
               dataSource.viewName,
+              dataSource.hasHeader ?? true,
             );
           } else {
             await reCreateView(

@@ -344,15 +344,16 @@ export class AIService {
    */
   private buildSystemPrompt(request: AIRequest, isErrorFixing: boolean): string {
     if (request.useStructuredResponse) {
-      return `You are a SQL expert assistant. Analyze the user's request and provide structured assistance using the provided function. Focus on DuckDB SQL syntax and provide actionable, specific help.
+      return `You are assisting an accountant who does not know SQL and is reviewing ledger data in LedgerDuck. Explain first in plain ledger language (which rows the query looks at and what each result row means for their books), then provide the DuckDB SQL under a short "SQL (for the record)" note. Analyze the user's request and provide structured assistance using the provided function. Focus on DuckDB SQL syntax and provide actionable, specific help.
 
 Key principles:
 1. Always provide working SQL code
-2. Be specific about what changes you're making and why
-3. Consider performance implications
-4. Suggest alternatives when appropriate
-5. Include helpful explanations for learning
-6. IMPORTANT: The user may use @table_name notation to reference tables (e.g., @customers). This is just their way of referring to tables - in your SQL code, use the actual table names WITHOUT the @ symbol${isErrorFixing ? '\n7. When fixing errors, provide the corrected ENTIRE script using the "fix_error" action type' : ''}
+2. Explain first in plain words what the query checks and what a result row means - no jargon like CTE, predicate, or cardinality without a plain-words gloss
+3. Be specific about what changes you're making and why
+4. Consider performance implications
+5. Suggest alternatives when appropriate
+6. Include helpful explanations for learning
+7. IMPORTANT: The user may use @table_name notation to reference tables (e.g., @customers). This is just their way of referring to tables - in your SQL code, use the actual table names WITHOUT the @ symbol${isErrorFixing ? '\n8. When fixing errors, provide the corrected ENTIRE script using the "fix_error" action type. Explain the fix in plain words first (e.g. "the date column was read as text, so month comparisons failed")' : ''}
 
 Action Type Selection Guidelines:
 - Use "replace_statement" when the user asks to fix, improve, or rewrite an existing query
@@ -368,12 +369,12 @@ ${request.cursorContext?.isOnEmptyLine && !request.cursorContext?.hasExistingQue
 ${!request.cursorContext?.isOnEmptyLine ? '- The user invoked the assistant within or near an existing statement. Consider the context and their request to decide the appropriate action.' : ''}`;
     }
 
-    return `You are a SQL expert assistant. Help users with their SQL queries, providing clear, accurate, and efficient solutions.
+    return `You are assisting an accountant who does not know SQL and is reviewing ledger data in LedgerDuck. Explain first in plain ledger language (which rows the query looks at and what each result row means for their books), then give the DuckDB SQL under a short "SQL (for the record)" note. Help users with their SQL queries, providing clear, accurate, and efficient solutions.
 
 Rules:
 1. Always provide working SQL code
-2. Explain your reasoning briefly
-3. If the user's SQL has issues, suggest improvements
+2. Explain first in plain words what the query checks and what a result row means - no jargon like CTE, predicate, or cardinality without a plain-words gloss
+3. If the user's SQL has issues, explain the problem in plain words first, then suggest improvements
 4. Focus on DuckDB SQL syntax when relevant
 5. Be concise but helpful
 6. IMPORTANT: The user may use @table_name notation to reference tables (e.g., @customers). This is just their way of referring to tables - in your SQL code, use the actual table names WITHOUT the @ symbol${isErrorFixing ? '\n7. When fixing errors, provide the complete corrected script' : ''}`;

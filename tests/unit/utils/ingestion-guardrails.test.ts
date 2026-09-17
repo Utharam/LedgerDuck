@@ -7,6 +7,7 @@ import { describe, it, expect } from '@jest/globals';
 import * as XLSX from 'xlsx';
 
 import {
+  columnLetter,
   sanitizeColumnHeader,
   sanitizeHeaderRow,
   hasMergedCells,
@@ -15,6 +16,15 @@ import {
 } from '../../../src/utils/ingestion-guardrails';
 
 describe('Ingestion Guardrails', () => {
+  describe('columnLetter', () => {
+    it('converts indexes to spreadsheet letters', () => {
+      expect(columnLetter(0)).toBe('A');
+      expect(columnLetter(5)).toBe('F');
+      expect(columnLetter(25)).toBe('Z');
+      expect(columnLetter(26)).toBe('AA');
+    });
+  });
+
   describe('sanitizeColumnHeader', () => {
     it('trims leading and trailing spaces', () => {
       const seen = new Set<string>();
@@ -64,7 +74,7 @@ describe('Ingestion Guardrails', () => {
       });
 
       await expect(validateAndSanitizeSpreadsheet(file)).rejects.toThrow(
-        /Merged cells detected in sheet "Transactions"/,
+        /contains merged \(joined\) cells/,
       );
     });
 
@@ -94,7 +104,7 @@ describe('Ingestion Guardrails', () => {
       const file = new File([csvContent], 'ragged.csv', { type: 'text/csv' });
 
       await expect(validateAndSanitizeCsv(file)).rejects.toThrow(
-        /Non-uniform column length detected in "ragged.csv"/,
+        /row 3 has 4 filled values but your headings cover 3/,
       );
     });
 

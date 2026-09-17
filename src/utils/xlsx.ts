@@ -181,12 +181,16 @@ export async function getXlsxSheetNames(file: File): Promise<string[]> {
  * @param fileName XLSX file name in DuckDB's file system
  * @param sheetName Sheet name within the XLSX file
  * @param viewName Name for the created view
+ * @param hasHeader Whether the first row holds column names (default true).
+ *   Passed as `header = true/false` to read_xlsx. When false, DuckDB keeps
+ *   the first row as data and generates column names.
  * @returns SQL query to create a view for the sheet
  */
 export function createXlsxSheetViewQuery(
   fileName: string,
   sheetName: string,
   viewName: string,
+  hasHeader = true,
 ): string {
-  return `CREATE OR REPLACE VIEW ${toDuckDBIdentifier(viewName)} AS SELECT * FROM read_xlsx(${quote(fileName, { single: true })}, sheet=${quote(sheetName, { single: true })}, ignore_errors=true);`;
+  return `CREATE OR REPLACE VIEW ${toDuckDBIdentifier(viewName)} AS SELECT * FROM read_xlsx(${quote(fileName, { single: true })}, sheet=${quote(sheetName, { single: true })}, header = ${hasHeader ? 'true' : 'false'}, ignore_errors=true);`;
 }

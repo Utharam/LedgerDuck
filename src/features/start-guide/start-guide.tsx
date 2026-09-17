@@ -4,13 +4,14 @@
  */
 
 import { showError } from '@components/app-notifications';
+import { createSQLScript } from '@controllers/sql-script';
+import { getOrCreateTabFromScript } from '@controllers/tab';
 import { AuditorGuideModal } from '@features/auditor-guide';
 import { useDuckDBConnectionPool } from '@features/duckdb-context/duckdb-context';
 import { SchemaPromptHelperModal } from '@features/schema-prompt-helper';
 import { useAddLocalFilesOrFolders } from '@hooks/use-add-local-files-folders';
 import { useAppTheme } from '@hooks/use-app-theme';
 import {
-  ActionIcon,
   Anchor,
   Badge,
   Box,
@@ -22,14 +23,12 @@ import {
   Text,
   ThemeIcon,
   Title,
-  Tooltip,
 } from '@mantine/core';
 import { spotlight } from '@mantine/spotlight';
 import {
   IconBolt,
   IconChecklist,
   IconCode,
-  IconExternalLink,
   IconFileSpreadsheet,
   IconFolderPlus,
   IconHelp,
@@ -38,10 +37,10 @@ import {
   IconSparkles,
   IconUpload,
 } from '@tabler/icons-react';
-import { createSQLScript } from '@controllers/sql-script';
-import { getOrCreateTabFromScript } from '@controllers/tab';
 import { loadSampleLedger } from '@utils/sample-ledger';
 import { useState, useCallback } from 'react';
+
+import { GettingStartedChecklist } from './components/getting-started-checklist';
 
 export const StartGuide = () => {
   const pool = useDuckDBConnectionPool();
@@ -217,6 +216,9 @@ export const StartGuide = () => {
           </Group>
         </Card>
 
+        {/* First-run checklist */}
+        <GettingStartedChecklist onOpenFile={handleAddFile} />
+
         {/* Quick Action Navigation Grid */}
         <Stack gap={8}>
           <Text size="xs" fw={600} c="text-secondary" className="uppercase tracking-wider">
@@ -238,10 +240,10 @@ export const StartGuide = () => {
                 </ThemeIcon>
                 <Stack gap={2}>
                   <Text size="xs" fw={600} c="text-primary">
-                    AI Prompt Helper (Zero-Knowledge)
+                    Ask ChatGPT safely
                   </Text>
                   <Text size="xs" c="text-secondary" className="leading-tight">
-                    Generate structured prompts for ChatGPT/Claude using your schema without exposing financial rows.
+                    Describe what you want in plain words. Only column names are copied — never your numbers.
                   </Text>
                 </Stack>
               </Group>
@@ -284,10 +286,10 @@ export const StartGuide = () => {
                 </ThemeIcon>
                 <Stack gap={2}>
                   <Text size="xs" fw={600} c="text-primary">
-                    Auditor User Guide & Docs
+                    How-to guide for accountants
                   </Text>
                   <Text size="xs" c="text-secondary" className="leading-tight">
-                    Plain-English manual for non-SQL auditors with 1-click LLM documentation export.
+                    A 5-minute tour: open your sheet, match 4 columns, run a check. No SQL needed.
                   </Text>
                 </Stack>
               </Group>

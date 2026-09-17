@@ -75,9 +75,9 @@ export function insertOrOpenQuery({
 
     if (!silent) {
       showSuccess({
-        title: 'Query Appended',
-        message: `Appended "${queryTitle || 'query'}" to active script "${activeScript.scriptName}".`,
-        autoClose: 2000,
+        title: 'Added to open query',
+        message: `"${queryTitle || 'query'}" was added to "${activeScript.scriptName}". Press Run there to execute it.`,
+        autoClose: 3000,
       });
     }
 
@@ -99,9 +99,9 @@ export function insertOrOpenQuery({
 
   if (!silent) {
     showSuccess({
-      title: 'New Query Created',
-      message: `Opened "${queryTitle || 'query'}" in a new tab.`,
-      autoClose: 2000,
+      title: 'Check opened',
+      message: `"${queryTitle || 'query'}" is ready in a new query tab. Press Run there to see results.`,
+      autoClose: 3000,
     });
   }
 

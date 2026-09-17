@@ -338,7 +338,7 @@ function getFlatFileDataAdapterQueries(
       ...baseAttrs,
       getRowCount: async (abortSignal: AbortSignal) => {
         const { value, aborted } = await pool.queryAbortable(
-          `SELECT num_rows FROM parquet_file_metadata('${sourceFile.uniqueAlias}.${sourceFile.ext}')`,
+          `SELECT num_rows FROM parquet_file_metadata(${quote(`${sourceFile.uniqueAlias}.${sourceFile.ext}`, { single: true })})`,
           abortSignal,
         );
 
@@ -380,9 +380,11 @@ function getDatabaseDataAdapterApi(
   } = {},
 ): { adapter: DataAdapterQueries | null; userErrors: string[]; internalErrors: string[] } {
   const rawDbName = tab.databaseName ?? getDatabaseIdentifier(dataSource);
+  const rawSchemaName = tab.schemaName;
+  const rawTableName = tab.objectName;
   const dbName = toDuckDBIdentifier(rawDbName);
-  const schemaName = toDuckDBIdentifier(tab.schemaName);
-  const tableName = toDuckDBIdentifier(tab.objectName);
+  const schemaName = toDuckDBIdentifier(rawSchemaName);
+  const tableName = toDuckDBIdentifier(rawTableName);
   const fqn = `${dbName}.${schemaName}.${tableName}`;
   const getSortableReader = options.usePagedReader
     ? getGetPagedSortableReaderApiFromFQN(pool, fqn)
@@ -399,9 +401,9 @@ function getDatabaseDataAdapterApi(
                   `SELECT estimated_size
                 FROM duckdb_tables
                 WHERE
-                  database_name = ${quote(dbName, { single: true })}
-                  AND schema_name = ${quote(schemaName, { single: true })}
-                  AND table_name = ${quote(tableName, { single: true })};
+                  database_name = ${quote(rawDbName, { single: true })}
+                  AND schema_name = ${quote(rawSchemaName, { single: true })}
+                  AND table_name = ${quote(rawTableName, { single: true })};
                 ;`,
                   abortSignal,
                 );
@@ -672,7 +674,11 @@ export function getScriptAdapterQueries({
         : undefined,
       getColumnAggregate: classifiedStmt.isAllowedInSubquery
         ? async (columnName: string, aggType: ColumnAggregateType, abortSignal: AbortSignal) => {
-            const queryToRun = `SELECT ${aggType}(${columnName}) FROM (${trimmedQuery})`;
+            const safeAgg =
+              aggType === 'count' || aggType === 'sum' || aggType === 'avg' || aggType === 'min' || aggType === 'max'
+                ? aggType
+                : 'count';
+            const queryToRun = `SELECT ${safeAgg}(${toDuckDBIdentifier(columnName)}) FROM (${trimmedQuery})`;
             const { value, aborted } = await pool.queryAbortableForTab(
               tab.id,
               queryToRun,

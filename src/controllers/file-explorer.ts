@@ -176,6 +176,7 @@ export const renameXlsxFile = async (
       dataSource.sheetName,
       oldViewName,
       newViewName,
+      dataSource.hasHeader ?? true,
     );
 
     // Create updated data source

@@ -25,6 +25,7 @@ export const addLocalFileOrFoldersCompat = async (
   conn: AsyncDuckDBConnectionPool,
   handles: (FileSystemDirectoryHandle | FileSystemFileHandle)[],
   fallbackFiles?: File[],
+  options?: { xlsxHasHeader?: boolean },
 ): Promise<{
   skippedExistingEntries: LocalEntry[];
   skippedUnsupportedFiles: string[];
@@ -60,7 +61,7 @@ export const addLocalFileOrFoldersCompat = async (
   }
 
   // Call the original function with the handles
-  return originalAddLocalFileOrFolders(conn, handles);
+  return originalAddLocalFileOrFolders(conn, handles, options);
 };
 
 /**

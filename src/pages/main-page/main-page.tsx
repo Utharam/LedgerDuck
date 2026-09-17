@@ -3,17 +3,20 @@ import { createSQLScript } from '@controllers/sql-script';
 import { getOrCreateTabFromScript } from '@controllers/tab';
 import { createComparisonTab } from '@controllers/tab/comparison-tab-controller';
 import { AuditPanel } from '@features/audit-panel';
+import { ForensicRoom } from '@features/forensic-room';
 import { StartGuide } from '@features/start-guide';
 import { TabView } from '@features/tab-view/tab-view';
 import { TabsPane } from '@features/tabs-pane';
+import { VocabularyRoom } from '@features/vocabulary-room';
 import { useAddLocalFilesOrFolders } from '@hooks/use-add-local-files-folders';
 import { useAppTheme } from '@hooks/use-app-theme';
-import { Stack } from '@mantine/core';
+import { Box, Stack } from '@mantine/core';
 import { useHotkeys, useLocalStorage } from '@mantine/hooks';
 import { Spotlight } from '@mantine/spotlight';
 import { LOCAL_STORAGE_KEYS } from '@models/local-storage';
 import { useAppStore } from '@store/app-store';
 import { useAuditPanelStore } from '@store/audit-panel-store';
+import { useRoomStore } from '@store/room-store';
 import { importSQLFiles } from '@utils/import-script-file';
 import { Allotment } from 'allotment';
 import { useCallback, useRef, useEffect, useState } from 'react';
@@ -28,6 +31,7 @@ export const MainPage = () => {
   const { handleAddFile, handleAddFolder } = useAddLocalFilesOrFolders();
   const colorScheme = useAppTheme();
   const { isOpen: auditPanelOpen, togglePanel: toggleAuditPanel } = useAuditPanelStore();
+  const activeRoom = useRoomStore((state) => state.activeRoom);
 
   const [layoutSizes, setOuterLayoutSizes] = useLocalStorage<number[]>({
     key: LOCAL_STORAGE_KEYS.MAIN_LAYOUT_DIMENSIONS,
@@ -170,6 +174,24 @@ export const MainPage = () => {
         toggleAuditPanel();
       },
     ],
+    [
+      'Alt+1',
+      () => {
+        useRoomStore.getState().setActiveRoom('query');
+      },
+    ],
+    [
+      'Alt+2',
+      () => {
+        useRoomStore.getState().setActiveRoom('forensic');
+      },
+    ],
+    [
+      'Alt+3',
+      () => {
+        useRoomStore.getState().setActiveRoom('vocabulary');
+      },
+    ],
   ]);
 
   const mainContent = (
@@ -196,29 +218,54 @@ export const MainPage = () => {
   );
 
   return (
-    <Allotment
-      className={colorScheme === 'dark' ? 'custom-allotment-dark' : 'custom-allotment'}
-      onChange={handleOuterLayoutResize}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-    >
-      <Allotment.Pane
-        preferredSize={sidebarCollapsed ? 56 : layoutSizes?.[0] || 260}
-        maxSize={sidebarCollapsed ? 56 : 400}
-        minSize={sidebarCollapsed ? 56 : 200}
+    <Box className="h-full w-full overflow-hidden" pos="relative">
+      {/* Room 1: Query Room */}
+      <Box
+        style={{
+          display: activeRoom === 'query' ? 'block' : 'none',
+          height: '100%',
+          width: '100%',
+        }}
       >
-        <AccordionNavbar onCollapse={toggleSidebar} collapsed={sidebarCollapsed} />
-      </Allotment.Pane>
-      <Allotment.Pane preferredSize={layoutSizes?.[1]}>{mainContent}</Allotment.Pane>
-      <Allotment.Pane
-        visible={auditPanelOpen}
-        preferredSize={320}
-        minSize={260}
-        maxSize={480}
-        snap
-      >
-        <AuditPanel />
-      </Allotment.Pane>
-    </Allotment>
+        <Allotment
+          className={colorScheme === 'dark' ? 'custom-allotment-dark' : 'custom-allotment'}
+          onChange={handleOuterLayoutResize}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+        >
+          <Allotment.Pane
+            preferredSize={sidebarCollapsed ? 56 : layoutSizes?.[0] || 260}
+            maxSize={sidebarCollapsed ? 56 : 400}
+            minSize={sidebarCollapsed ? 56 : 200}
+          >
+            <AccordionNavbar onCollapse={toggleSidebar} collapsed={sidebarCollapsed} />
+          </Allotment.Pane>
+          <Allotment.Pane preferredSize={layoutSizes?.[1]}>{mainContent}</Allotment.Pane>
+          <Allotment.Pane
+            visible={auditPanelOpen}
+            preferredSize={320}
+            minSize={260}
+            maxSize={480}
+            snap
+          >
+            <AuditPanel />
+          </Allotment.Pane>
+        </Allotment>
+      </Box>
+
+      {/* Room 2: Forensic Room */}
+      {activeRoom === 'forensic' && (
+        <Box style={{ height: '100%', width: '100%' }}>
+          <ForensicRoom />
+        </Box>
+      )}
+
+      {/* Room 3: Vocabulary Map Room */}
+      {activeRoom === 'vocabulary' && (
+        <Box style={{ height: '100%', width: '100%' }}>
+          <VocabularyRoom />
+        </Box>
+      )}
+    </Box>
   );
 };

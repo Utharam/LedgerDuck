@@ -15,13 +15,17 @@ export type AuditTemplateId =
   | 'potential-split-transactions'
   | 'round-sum-audit'
   | 'outlier-materiality'
-  | 'weekend-bookings';
+  | 'weekend-bookings'
+  | 'dataset-profile'
+  | 'vocabulary-frequency'
+  | 'ledger-buckets'
+  | 'narration-variants';
 
 export interface AuditTemplate {
   id: AuditTemplateId;
   title: string;
   description: string;
-  category: 'Integrity' | 'Fraud Risk' | 'Materiality' | 'Compliance';
+  category: 'Integrity' | 'Fraud Risk' | 'Materiality' | 'Compliance' | 'Vocabulary';
   badgeColor: string;
   generateSql: (tableName: string, mapping: AuditColumnMapping) => string;
 }

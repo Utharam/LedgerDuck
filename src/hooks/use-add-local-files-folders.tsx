@@ -5,17 +5,91 @@ import {
   pickFolderCompat,
 } from '@controllers/file-system/cross-browser-file-system-controller';
 import { useDuckDBConnectionPool } from '@features/duckdb-context/duckdb-context';
+import { Button, Group, Stack, Switch, Text } from '@mantine/core';
+import { modals } from '@mantine/modals';
 import { notifications } from '@mantine/notifications';
 import { LocalEntry, WebkitFile } from '@models/file-system';
 import { fileSystemService } from '@utils/file-system-adapter';
 import { createFileHandleWrapper } from '@utils/file-system-adapter/handle-converter';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
+
+const isSpreadsheetName = (name: string): boolean =>
+  name.toLowerCase().endsWith('.xlsx') || name.toLowerCase().endsWith('.xls');
+
+const XlsxHeaderChoice = ({
+  fileNames,
+  onConfirm,
+  onCancel,
+}: {
+  fileNames: string[];
+  onConfirm: (hasHeader: boolean) => void;
+  onCancel: () => void;
+}) => {
+  const [hasHeader, setHasHeader] = useState(true);
+  return (
+    <Stack gap={12}>
+      <Text size="sm" c="text-secondary">
+        {fileNames.length === 1
+          ? `Importing ${fileNames[0]}. Is Row 1 your headings (like Date / Description / Amount)?`
+          : `Importing ${fileNames.length} spreadsheets (${fileNames.slice(0, 3).join(', ')}${
+              fileNames.length > 3 ? ', …' : ''
+            }). Is Row 1 headings (like Date / Description / Amount) in all of them?`}
+      </Text>
+      <Text size="xs" c="text-secondary">
+        Nothing is deleted either way — Row 1 is always kept. Answering wrong only affects the
+        column names, which you can fix by removing and re-adding the file.
+      </Text>
+      <Switch
+        label="Yes, Row 1 holds the headings"
+        description={
+          hasHeader
+            ? 'Row 1 becomes the column names.'
+            : 'Row 1 is kept as data; columns get automatic names.'
+        }
+        checked={hasHeader}
+        onChange={(e) => setHasHeader(e.currentTarget.checked)}
+      />
+      <Group justify="flex-end" gap={8}>
+        <Button variant="subtle" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button onClick={() => onConfirm(hasHeader)}>Import</Button>
+      </Group>
+    </Stack>
+  );
+};
+
+/**
+ * Asks whether spreadsheet first rows are headers. Resolves null on cancel/close.
+ */
+export const askXlsxHeaderOption = (fileNames: string[]): Promise<boolean | null> =>
+  new Promise((resolve) => {
+    let settled = false;
+    const settle = (value: boolean | null) => {
+      if (settled) return;
+      settled = true;
+      modals.close(modalId);
+      resolve(value);
+    };
+    const modalId = modals.open({
+      title: 'Does Row 1 hold your headings?',
+      centered: true,
+      closeOnClickOutside: false,
+      onClose: () => settle(null),
+      children: (
+        <XlsxHeaderChoice
+          fileNames={fileNames}
+          onConfirm={(v) => settle(v)}
+          onCancel={() => settle(null)}
+        />
+      ),
+    });
+  });
 
 export const useAddLocalFilesOrFolders = () => {
   const pool = useDuckDBConnectionPool();
 
-  const handleAddFile = useCallback(async () => {
-    // TODO: we should see if we ca avoid calling this hook in uninitialized
+  const handleAddFile = useCallback(async () => {    // TODO: we should see if we ca avoid calling this hook in uninitialized
     // state, and instead of this check, use `useInitializedDuckDBConnection`
     // to get the non-null connection
     if (!pool) {
@@ -38,13 +112,27 @@ export const useAddLocalFilesOrFolders = () => {
       return;
     }
 
+    // Spreadsheet header toggle: ask once per import when any .xlsx/.xls is picked.
+    const spreadsheetNames = [
+      ...handles.filter((h) => isSpreadsheetName(h.name)).map((h) => h.name),
+      ...(fallbackFiles ?? []).filter((f) => isSpreadsheetName(f.name)).map((f) => f.name),
+    ];
+    let xlsxHasHeader = true;
+    if (spreadsheetNames.length > 0) {
+      const choice = await askXlsxHeaderOption(spreadsheetNames);
+      if (choice === null) {
+        return;
+      }
+      xlsxHasHeader = choice;
+    }
+
     const {
       skippedExistingEntries,
       skippedUnsupportedFiles,
       skippedEmptySheets,
       skippedEmptyDatabases,
       errors,
-    } = await addLocalFileOrFoldersCompat(pool, handles, fallbackFiles);
+    } = await addLocalFileOrFoldersCompat(pool, handles, fallbackFiles, { xlsxHasHeader });
 
     if (skippedExistingEntries.length) {
       showWarning({

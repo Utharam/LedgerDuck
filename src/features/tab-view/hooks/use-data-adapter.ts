@@ -705,20 +705,40 @@ export const useDataAdapter = ({ tab, sourceVersion }: UseDataAdapterProps): Dat
           // If we read enough data, we can stop
           (fetchTo.current === null || actualData.current.length < fetchTo.current)
         ) {
-          // Run an abortable read
-          const { done, value } = await Promise.race([
-            mainDataReaderRef.current.next(),
-            new Promise<never>((_, reject) => {
-              abortSignal.addEventListener('abort', () => {
+          // Run an abortable read (listener removed on settle to avoid leak)
+          const nextPromise = mainDataReaderRef.current.next();
+          const { done, value } = await new Promise<Awaited<typeof nextPromise>>(
+            (resolve, reject) => {
+              if (abortSignal.aborted) {
                 reject(
                   new DOMException(
                     'Operation cancelled as it was replaced by a newer copy/export request',
-                    'Cancelled',
+                    'AbortError',
                   ),
                 );
-              });
-            }),
-          ]);
+                return;
+              }
+              const onAbort = () => {
+                reject(
+                  new DOMException(
+                    'Operation cancelled as it was replaced by a newer copy/export request',
+                    'AbortError',
+                  ),
+                );
+              };
+              abortSignal.addEventListener('abort', onAbort, { once: true });
+              nextPromise.then(
+                (v) => {
+                  abortSignal.removeEventListener('abort', onAbort);
+                  resolve(v);
+                },
+                (e) => {
+                  abortSignal.removeEventListener('abort', onAbort);
+                  reject(e);
+                },
+              );
+            },
+          );
 
           if (done) {
             readAll = true;

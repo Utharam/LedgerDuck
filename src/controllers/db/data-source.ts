@@ -444,12 +444,13 @@ export async function createXlsxSheetView(
   fileName: string,
   sheetName: string,
   viewName: string,
+  hasHeader = true,
 ) {
   // Load the Excel extension, it will be ignored if already loaded
   await conn.query('LOAD excel');
 
   // Create the view for the specified sheet
-  const query = createXlsxSheetViewQuery(fileName, sheetName, viewName);
+  const query = createXlsxSheetViewQuery(fileName, sheetName, viewName, hasHeader);
   await conn.query(query);
 }
 
@@ -468,6 +469,7 @@ export async function reCreateXlsxSheetView(
   sheetName: string,
   oldViewName: string,
   newViewName: string,
+  hasHeader = true,
 ) {
   /**
    * Drop the old view
@@ -476,6 +478,6 @@ export async function reCreateXlsxSheetView(
   await conn.query(dropQuery).catch(console.error);
 
   // Create the view with the new name
-  const query = createXlsxSheetViewQuery(fileName, sheetName, newViewName);
+  const query = createXlsxSheetViewQuery(fileName, sheetName, newViewName, hasHeader);
   await conn.query(query);
 }

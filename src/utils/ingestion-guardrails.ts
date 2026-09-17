@@ -76,6 +76,19 @@ export function sanitizeHeaderRow(headers: (string | number | undefined | null)[
 }
 
 /**
+ * Converts a zero-based column index to spreadsheet letters (0 -> A, 25 -> Z, 26 -> AA).
+ */
+export function columnLetter(index: number): string {
+  let letters = '';
+  let n = index;
+  while (n >= 0) {
+    letters = String.fromCharCode((n % 26) + 65) + letters;
+    n = Math.floor(n / 26) - 1;
+  }
+  return letters;
+}
+
+/**
  * Checks if a worksheet contains merged cells
  */
 export function hasMergedCells(sheet: XLSX.WorkSheet): boolean {
@@ -86,8 +99,14 @@ export function hasMergedCells(sheet: XLSX.WorkSheet): boolean {
  * Validates and sanitizes a spreadsheet (.xlsx, .xls) file.
  * Rejects merged cells and non-rectangular data.
  * Sanitizes column headers and returns a clean File object.
+ * @param hasHeader Whether the first row holds column names (default true).
+ *   When false, header sanitization is skipped (all rows are data) and the
+ *   file is returned as-is after rectangularity validation.
  */
-export async function validateAndSanitizeSpreadsheet(file: File): Promise<{
+export async function validateAndSanitizeSpreadsheet(
+  file: File,
+  hasHeader = true,
+): Promise<{
   sanitizedFile: File;
   sheetNames: string[];
 }> {
@@ -119,7 +138,7 @@ export async function validateAndSanitizeSpreadsheet(file: File): Promise<{
     // 1. Guardrail: Reject merged cells
     if (hasMergedCells(ws)) {
       throw new IngestionValidationError(
-        `Merged cells detected in sheet "${sheetName}". Please flatten your spreadsheet before importing.`,
+        `Sheet "${sheetName}" contains merged (joined) cells. Please unmerge them so every row has its own cells, then upload again. Your file was not changed.`,
       );
     }
 
@@ -131,6 +150,27 @@ export async function validateAndSanitizeSpreadsheet(file: File): Promise<{
     });
 
     if (rows.length === 0) {
+      continue;
+    }
+
+    if (!hasHeader) {
+      // No header row: validate rectangularity against the widest row,
+      // keep all rows as data (no header rewrite).
+      const expectedColCount = Math.max(...rows.map((r) => r.length));
+      if (expectedColCount === 0) {
+        continue;
+      }
+      for (let r = 0; r < rows.length; r++) {
+        const row = rows[r];
+        if (row.length > expectedColCount) {
+          const hasExtraData = row.slice(expectedColCount).some((cell) => cell !== '' && cell != null);
+          if (hasExtraData) {
+            throw new IngestionValidationError(
+              `Sheet "${sheetName}": row ${r + 1} has filled cells past column ${columnLetter(expectedColCount - 1)} (the widest row covers ${expectedColCount} columns). Clear the extra cells and upload again. Your file was not changed.`,
+            );
+          }
+        }
+      }
       continue;
     }
 
@@ -151,7 +191,7 @@ export async function validateAndSanitizeSpreadsheet(file: File): Promise<{
         const hasExtraData = row.slice(expectedColCount).some((cell) => cell !== '' && cell != null);
         if (hasExtraData) {
           throw new IngestionValidationError(
-            `Non-uniform column length detected in sheet "${sheetName}". Row ${r + 1} contains data outside the header columns. Spreadsheets must be rectangular.`,
+            `Sheet "${sheetName}": row ${r + 1} has filled cells past column ${columnLetter(expectedColCount - 1)} (your headings cover ${expectedColCount} columns). Clear the extra cells and upload again. Your file was not changed.`,
           );
         }
       }
@@ -212,8 +252,7 @@ export function parseCsvRows(csvText: string): string[][] {
         currentField += char;
         i += 1;
       }
-    } else {
-      if (char === '"') {
+    } else if (char === '"') {
         inQuotes = true;
         i += 1;
       } else if (char === ',') {
@@ -236,7 +275,6 @@ export function parseCsvRows(csvText: string): string[][] {
         currentField += char;
         i += 1;
       }
-    }
   }
 
   // Push remaining field / row
@@ -268,7 +306,9 @@ export async function validateAndSanitizeCsv(file: File): Promise<{
   const expectedColCount = rawHeaders.length;
 
   if (expectedColCount === 0) {
-    throw new IngestionValidationError(`CSV file "${file.name}" has an empty header row.`);
+    throw new IngestionValidationError(
+      `File "${file.name}": the first row looks empty. If row 1 holds your headings, fill it in and upload again. Your file was not changed.`,
+    );
   }
 
   // 1. Guardrail: Check uniform column count
@@ -276,7 +316,7 @@ export async function validateAndSanitizeCsv(file: File): Promise<{
     const row = rows[r];
     if (row.length !== expectedColCount) {
       throw new IngestionValidationError(
-        `Non-uniform column length detected in "${file.name}". Row ${r + 1} has ${row.length} columns, expected ${expectedColCount}. All rows must have the same number of columns.`,
+        `File "${file.name}": row ${r + 1} has ${row.length} filled values but your headings cover ${expectedColCount}. Fix the row and upload again. Your file was not changed.`,
       );
     }
   }

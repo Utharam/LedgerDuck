@@ -3,7 +3,7 @@ import { APP_DB_NAME } from '@models/persisted-store';
 /* eslint-disable no-alert */
 export const deleteApplicationData = async () => {
   const confirmDelete = window.confirm(
-    'Are you sure you want to delete all application data? This action cannot be undone.',
+    'Clear LedgerDuck\u2019s saved workspace? Your original files on your computer are NOT affected — only this website\u2019s saved checks and settings are removed. This cannot be undone.',
   );
 
   if (!confirmDelete) {

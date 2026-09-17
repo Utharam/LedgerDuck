@@ -10,7 +10,7 @@ import {
   Box,
   Button,
   Card,
-  Code,
+  Collapse,
   Divider,
   Group,
   Modal,
@@ -19,7 +19,6 @@ import {
   Stack,
   Text,
   ThemeIcon,
-  Title,
 } from '@mantine/core';
 import { useClipboard } from '@mantine/hooks';
 import {
@@ -27,11 +26,9 @@ import {
   IconCheck,
   IconChecklist,
   IconCopy,
-  IconDatabase,
   IconFileSpreadsheet,
   IconHistory,
   IconLockCheck,
-  IconShieldCheck,
   IconSparkles,
 } from '@tabler/icons-react';
 import React from 'react';
@@ -41,62 +38,58 @@ interface AuditorGuideModalProps {
   onClose: () => void;
 }
 
-export const AUDITOR_GUIDE_MARKDOWN = `# LedgerDuck - Auditor & Accountant User Guide
+export const AUDITOR_GUIDE_MARKDOWN = `# LedgerDuck - 5-Minute Guide for Accountants (No SQL Needed)
 
-## What is LedgerDuck?
-LedgerDuck is a 100% private, client-side SQL investigation workspace designed specifically for financial auditors, forensic accountants, and controllers. It runs an embedded DuckDB database engine directly inside your web browser.
+## The read-only promise
+LedgerDuck only READS your Excel file. It never edits it, never saves into it, and never uploads it anywhere. Everything runs inside your own browser. If anything goes wrong, your original file is untouched.
 
-## What LedgerDuck is NOT
-- NOT a cloud database. Your sensitive financial data is NEVER uploaded to any cloud server or third-party database.
-- NOT an online AI scraper. No row data, vendor names, bank balances, or transaction details ever leave your browser.
+## Your 4 steps
+1. Open your Excel sheet (drop the file on the start page, or press Open File).
+2. Match your columns: tell LedgerDuck which columns hold the Date, Description, Ledger Head, and Amount. You can re-pick anytime.
+3. Run a ready-made check: Exact Duplicates, Split Transactions, Round-Sum Audit, Materiality Top 10, or Weekend Bookings. Press "Open this check", then press Run.
+4. Read the rows that need review. Save them as a CSV record for your files if needed.
 
----
+## The three rooms - and why
+LedgerDuck has three rooms because an audit has three different jobs. Switch at the top of the screen (Alt+1, Alt+2, Alt+3).
+1. Query room - your desk. Sheets live here and checks open here. You never have to type here, but every check lands here as readable SQL so anyone can verify what was tested.
+2. Forensic room - the checklist. One-click checks with a Run button each. Start here when you want answers.
+3. Vocabulary room - the magnifying glass. For questions no fixed check can answer: where was "taxi" posted? What hides inside Miscellaneous? Pick a word, see where it was posted, read the vouchers.
 
-## Core Capabilities for Financial Audits
+## Ready-made checks
+- Exact Duplicates: same date, description, and amount appearing more than once (double payments).
+- Split Transactions: same-day identical amounts that may have been split to bypass approval limits.
+- Round-Sum Audit: round amounts of 1,000 or more (often estimates or manual overrides).
+- Materiality Top 10: the largest transactions by value, for sampling.
+- Weekend Bookings: entries posted on Saturday or Sunday.
 
-### 1. Ingestion Guardrails (Clean & Rectangular Data)
-- **Supported Formats**: Excel (.xlsx, .xls) and CSV (.csv).
-- **Merged Cell Rejection**: Merged cells corrupt accounting aggregations. LedgerDuck intercepts and rejects spreadsheets with merged cells with a clear alert ("Merged cells detected. Please flatten your spreadsheet.").
-- **Rectangular Uniformity**: Validates that all data rows have a uniform number of columns (no ragged or jagged lines).
-- **Automatic Header Sanitization**: Trims leading/trailing whitespace, cleans illegal special characters, resolves quotes, and deduplicates identical header names.
+## Asking ChatGPT safely
+Use "Ask ChatGPT safely" in the app. It copies ONLY your sheet and column names - never amounts, names, or row data. Paste that safe summary into ChatGPT yourself (sending your data there directly would break the privacy promise above).
 
-### 2. Pre-Loaded Accounting Command Drawer
-Located in the left sidebar under "Audit Templates", this panel auto-detects your accounting columns (Date, Particulars, Category, Amount) and gives 1-click DuckDB SQL templates:
-- **Exact Duplicates**: Detects potential duplicate billings or double payments with identical date, particulars, and amount.
-- **Potential Split Transactions**: Flags same-day identical amounts across multiple entries (risk of smurfing or structuring transactions to bypass management approval thresholds).
-- **Round-Sum Audit**: Identifies round-dollar transactions (e.g. $5,000, $50,000) that often signal subjective management estimates, manual journal overrides, or fictitious entries.
-- **Outlier / Materiality Top 10**: Ranks top materiality items by absolute value for substantive audit sampling.
-- **Weekend / Non-Business Day Bookings**: Catches journal entries or disbursements posted on Saturdays and Sundays.
+## Words you will see
+- Sheet: your Excel sheet, as the app sees it.
+- Description: the transaction text column (also called Narration or Particulars).
+- Ledger Head: where each row was posted (also called Account Head or Category).
+- Check: a ready-made test you can run.
+- Rows that need review: the results worth looking at.
+- Record (CSV): a saved copy of those rows for your files.
+- Mapping: telling the app which column is which (step 2 above).
 
-### 3. Zero-Knowledge Schema-to-Prompt Helper
-When you need a custom SQL query:
-- Click the "AI Prompt Helper" button in the top navigation bar.
-- LedgerDuck extracts ONLY the table structure (column names and data types). ZERO row records or transaction values are ever extracted.
-- Click column pill badges to insert column names into your objective.
-- Click "Copy Formatted Prompt" and paste it into ChatGPT, Claude, or Gemini.
-- Paste the generated DuckDB SQL directly into a query tab in LedgerDuck.
-
-### 4. Audit Trail & SQL Execution Log
-- Every SQL query you execute is automatically recorded in a local session log with ISO timestamps, human-readable local time, execution duration (ms), row counts, and status (Success/Error).
-- Access the "Audit Trail" tab from the tab bar.
-- Re-run any past query with 1 click.
-- Click "Export Workpaper (CSV)" or "Export JSON" to generate formal documentation for your audit workpapers and regulatory workfiles.
-
----
-### Attribution & Licensing
-LedgerDuck is licensed under AGPL-3.0 and is built upon PondPilot by T1A.`;
+## How it works (optional reading)
+Files are checked on import: joined (merged) cells are rejected, every row must have the same number of filled columns, and headings are tidied. DuckDB SQL runs locally in your browser; every run is logged so the work stands up.
+`;
 
 export const AuditorGuideModal: React.FC<AuditorGuideModalProps> = ({
   opened,
   onClose,
 }) => {
   const clipboard = useClipboard({ timeout: 2500 });
+  const [showHowItWorks, setShowHowItWorks] = React.useState(false);
 
   const handleCopyGuide = () => {
     clipboard.copy(AUDITOR_GUIDE_MARKDOWN);
     showSuccess({
-      title: 'Guide Copied to Clipboard!',
-      message: 'Full documentation copied. Paste it into ChatGPT, Claude, or Gemini to guide your SQL generation.',
+      title: 'Safe summary copied!',
+      message: 'Paste it into ChatGPT, Claude, or Gemini. It contains no amounts, names, or row data.',
       autoClose: 3500,
     });
   };
@@ -112,10 +105,10 @@ export const AuditorGuideModal: React.FC<AuditorGuideModalProps> = ({
           </ThemeIcon>
           <div>
             <Text fw={700} size="sm" c="text-primary">
-              LedgerDuck Auditor Guide & Documentation
+              How to audit with LedgerDuck
             </Text>
             <Text size="xs" c="text-secondary">
-              Zero-knowledge accounting investigation and SQL audit documentation
+              A 5-minute tour for accountants. No SQL needed.
             </Text>
           </div>
         </Group>
@@ -129,13 +122,15 @@ export const AuditorGuideModal: React.FC<AuditorGuideModalProps> = ({
           {/* Privacy Guarantee Alert */}
           <Alert
             icon={<IconLockCheck size={20} />}
-            title="100% Client-Side Privacy Guarantee"
+            title="Read-only: your Excel file is never changed"
             color="teal"
             variant="light"
             radius="sm"
           >
             <Text size="xs" c="teal.9">
-              <strong>Your financial data never leaves your computer.</strong> All spreadsheet parsing, DuckDB SQL execution, and audit logging happen locally inside your browser memory.
+              <strong>Your financial data never leaves your computer.</strong> LedgerDuck only reads
+              your file — it never edits it, saves into it, or uploads it. If anything goes wrong,
+              your original file is untouched. Mapping columns wrong? Just re-pick — nothing breaks.
             </Text>
           </Alert>
 
@@ -147,11 +142,12 @@ export const AuditorGuideModal: React.FC<AuditorGuideModalProps> = ({
                   <IconFileSpreadsheet size={14} />
                 </ThemeIcon>
                 <Text size="xs" fw={600} c="text-primary">
-                  1. Ingestion Guardrails
+                  1. Open your Excel sheet
                 </Text>
               </Group>
               <Text size="xs" c="text-secondary">
-                Upload .xlsx, .xls, or .csv files. Rejects merged cells, enforces rectangular row consistency, and automatically sanitizes column titles.
+                Drop your file on the start page or press Open File. You will be asked whether Row 1
+                holds your headings — answering wrong only affects column names, never your data.
               </Text>
             </Card>
 
@@ -161,11 +157,12 @@ export const AuditorGuideModal: React.FC<AuditorGuideModalProps> = ({
                   <IconChecklist size={14} />
                 </ThemeIcon>
                 <Text size="xs" fw={600} c="text-primary">
-                  2. Accounting Command Drawer
+                  2. Match your 4 columns
                 </Text>
               </Group>
               <Text size="xs" c="text-secondary">
-                1-Click DuckDB SQL templates for Exact Duplicates, Split Transactions, Round-Sum Fraud Risk, Materiality Outliers, and Weekend Bookings.
+                Tell the app which columns hold the Date, Description, Ledger Head, and Amount.
+                Ready-made checks and word maps use this mapping — re-pick anytime.
               </Text>
             </Card>
 
@@ -175,11 +172,12 @@ export const AuditorGuideModal: React.FC<AuditorGuideModalProps> = ({
                   <IconSparkles size={14} />
                 </ThemeIcon>
                 <Text size="xs" fw={600} c="text-primary">
-                  3. Zero-Knowledge Prompt Helper
+                  3. Run ready-made checks
                 </Text>
               </Group>
               <Text size="xs" c="text-secondary">
-                Build structured prompts for ChatGPT/Claude/Gemini with clickable column pills. Extracts schema only (zero row data leaves your device).
+                Duplicates, split transactions, round sums, top-10 largest, weekend postings — press
+                “Open this check”, then press Run. Results are rows that need review, not verdicts.
               </Text>
             </Card>
 
@@ -189,16 +187,56 @@ export const AuditorGuideModal: React.FC<AuditorGuideModalProps> = ({
                   <IconHistory size={14} />
                 </ThemeIcon>
                 <Text size="xs" fw={600} c="text-primary">
-                  4. Audit Trail & Workpaper Export
+                  4. Ask ChatGPT safely
                 </Text>
               </Group>
               <Text size="xs" c="text-secondary">
-                Automatically logs every SQL query execution with timestamps, duration, and status. Export as CSV/JSON workpapers for audit files.
+                For custom questions, copy a safe summary (sheet and column names only — no amounts
+                or names) and paste it into ChatGPT yourself. Sending your data there directly would
+                break the privacy promise above.
               </Text>
             </Card>
           </SimpleGrid>
 
-          <Divider label="Audit Templates Explained" labelPosition="left" />
+          <Divider label="The three rooms — and why" labelPosition="left" />
+          <Text size="xs" c="text-secondary" className="leading-relaxed">
+            LedgerDuck has three rooms because an audit has three different jobs. Switch between
+            them at the top of the screen (or press Alt+1, Alt+2, Alt+3).
+          </Text>
+          <Stack gap={10}>
+            <Box>
+              <Text size="xs" fw={600} c="text-primary">
+                1. Query room — your desk
+              </Text>
+              <Text size="xs" c="text-secondary" mt={2}>
+                This is where your sheets live and where checks open when you press “Open this
+                check”. You never have to type here — but every check lands here as readable SQL,
+                so anyone can verify exactly what was tested.
+              </Text>
+            </Box>
+            <Box>
+              <Text size="xs" fw={600} c="text-primary">
+                2. Forensic room — the checklist
+              </Text>
+              <Text size="xs" c="text-secondary" mt={2}>
+                One-click checks (duplicates, split transactions, round sums, weekend postings) with
+                a Run button each. Start here when you want answers: it runs the tests and shows
+                only the rows that need review.
+              </Text>
+            </Box>
+            <Box>
+              <Text size="xs" fw={600} c="text-primary">
+                3. Vocabulary room — the magnifying glass
+              </Text>
+              <Text size="xs" c="text-secondary" mt={2}>
+                For questions no fixed check can answer: where was the word “taxi” posted? What is
+                hiding inside Miscellaneous? Is “John” sitting in Staff Expense? Pick a word, see
+                where it was posted, read the actual vouchers.
+              </Text>
+            </Box>
+          </Stack>
+
+          <Divider label="What each check looks for" labelPosition="left" />
 
           {/* Audit Templates Details */}
           <Stack gap={10}>
@@ -234,7 +272,8 @@ export const AuditorGuideModal: React.FC<AuditorGuideModalProps> = ({
                 </Text>
               </Group>
               <Text size="xs" c="text-secondary" mt={2}>
-                Filters entries where Amount has no decimals and absolute value &gt;= 1,000. In general ledgers, authentic operating expenses usually include cents/cents variance, while estimates and unauthorized draws are often round sums.
+                Filters entries of 1,000 or more with no paise/cents. Real operating expenses usually
+                have odd amounts — round sums often mean estimates or manual entries.
               </Text>
             </Box>
 
@@ -254,14 +293,55 @@ export const AuditorGuideModal: React.FC<AuditorGuideModalProps> = ({
               <Group gap={6} align="center">
                 <Badge size="xs" color="teal">Compliance</Badge>
                 <Text size="xs" fw={600} c="text-primary">
-                  Weekend / Non-Business Day Bookings
+                  Weekend postings
                 </Text>
               </Group>
               <Text size="xs" c="text-secondary" mt={2}>
-                Uses DuckDB&apos;s <Code>DAYOFWEEK()</Code> to flag postings on Saturday and Sunday.
+                Flags entries posted on Saturday or Sunday — unusual for most businesses, worth a look.
               </Text>
             </Box>
           </Stack>
+
+          <Divider label="Words you will see" labelPosition="left" />
+          <Stack gap={4}>
+            {[
+              ['Sheet', 'Your Excel sheet, as the app sees it.'],
+              ['Description', 'The transaction text column (also called Narration or Particulars).'],
+              ['Ledger Head', 'Where each row was posted (also called Account Head or Category).'],
+              ['Check', 'A ready-made test you can run.'],
+              ['Rows that need review', 'Results worth looking at — flags, not verdicts.'],
+              ['Record (CSV)', 'A saved copy of those rows for your files.'],
+              ['Mapping', 'Telling the app which column is which. Re-pick anytime.'],
+            ].map(([term, meaning]) => (
+              <Group key={term} gap={6} wrap="nowrap" align="flex-start">
+                <Text size="xs" fw={600} c="text-primary" className="whitespace-nowrap">
+                  {term}:
+                </Text>
+                <Text size="xs" c="text-secondary">
+                  {meaning}
+                </Text>
+              </Group>
+            ))}
+          </Stack>
+
+          <Button
+            size="xs"
+            variant="subtle"
+            color="gray"
+            fullWidth
+            onClick={() => setShowHowItWorks((v) => !v)}
+          >
+            {showHowItWorks ? 'Hide how it works' : 'How it works (optional reading)'}
+          </Button>
+          <Collapse in={showHowItWorks}>
+            <Stack gap={8}>
+              <Text size="xs" c="text-secondary" className="leading-relaxed">
+                On import, files are checked: joined (merged) cells are rejected, every row must have
+                the same number of filled columns, and headings are tidied. Checks run as DuckDB SQL
+                inside your browser and every run is logged, so the work stands up to review.
+              </Text>
+            </Stack>
+          </Collapse>
 
           <Divider label="Credits & Attribution" labelPosition="left" />
           <Text size="xs" c="text-secondary">
@@ -279,7 +359,7 @@ export const AuditorGuideModal: React.FC<AuditorGuideModalProps> = ({
               leftSection={clipboard.copied ? <IconCheck size={14} /> : <IconCopy size={14} />}
               onClick={handleCopyGuide}
             >
-              {clipboard.copied ? 'Guide Copied!' : 'Copy Full Documentation for AI'}
+              {clipboard.copied ? 'Safe summary copied!' : 'Copy safe summary for ChatGPT'}
             </Button>
 
             <Button size="xs" variant="default" onClick={onClose}>
